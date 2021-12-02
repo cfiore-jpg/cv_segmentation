@@ -1,6 +1,8 @@
 from glob import glob
 
 import IPython.display as display
+from scipy.io import loadmat 
+from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -13,33 +15,45 @@ import tensorflow_addons as tfa
 
 
 # --------------------------------------- Preprocess ------------------------------------- #
-dataset_path = ""
-training_data = ""
-val_data = ""
+images = "/Users/cameronfiore/Downloads/CSCI1430/cv_segmentation/data/VOC2010/JPEGImages/"
+annotations = "/Users/cameronfiore/Downloads/CSCI1430/cv_segmentation/data/trainval/trainval/"
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 # Image size that we are going to use
-IMG_SIZE = 128
+IMG_SIZE = 375
 # Our images are RGB (3 channels)
 N_CHANNELS = 3
-# Scene Parsing has 150 classes + `not labeled`
-N_CLASSES = 151
+# Scene Parsing has 459 classes
+N_CLASSES = 459
 
-TRAINSET_SIZE = len(glob(dataset_path + training_data + "*.jpg"))
+[train_paths, val_paths] = train_test_split(glob(annotations + "*.mat"), test_size=0.3, train_size=0.7)
+
+TRAINSET_SIZE = len(train_paths)
 print(f"The Training Dataset contains {TRAINSET_SIZE} images.")
 
-VALSET_SIZE = len(glob(dataset_path + val_data + "*.jpg"))
+VALSET_SIZE = len(val_paths)
 print(f"The Validation Dataset contains {VALSET_SIZE} images.")
 
 
-def parse_image(img_path: str) -> dict:
-    #------TO DO------#
-    pass
+def parse_image(mat_path: str) -> dict:
+    # with tf.Session() as sess:
+    #     sess.run(init)
+    #     mat_path = mat_path.eval()
+    # mask = tf.convert_to_tensor(np.array(loadmat(mat_path, appendmat=False)['LabelMap']))
+    # mask = tf.expand_dims(mask, -1)
 
-train_dataset = tf.data.Dataset.list_files(dataset_path + training_data + "*.jpg")
+    image_path = tf.strings.regex_replace(mat_path, annotations, images)
+    image_path = tf.strings.regex_replace(image_path, ".mat", ".jpg")
+    image = tf.io.read_file(image_path)
+    image = tf.image.decode_jpeg(image, channels=3)
+    image = tf.image.convert_image_dtype(image, tf.uint16)
+
+    return {'image': image, 'segmentation_mask': mask}
+
+train_dataset = tf.data.Dataset.list_files(train_paths)
 train_dataset = train_dataset.map(parse_image)
 
-val_dataset = tf.data.Dataset.list_files(dataset_path + val_data + "*.jpg")
+val_dataset = tf.data.Dataset.list_files(val_paths)
 val_dataset = val_dataset.map(parse_image)
 
 
