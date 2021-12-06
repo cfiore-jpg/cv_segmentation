@@ -1,5 +1,7 @@
 import numpy as np
+#import av
 from skimage.transform import resize
+#import pims
 
 #TODO:CONSIDER TO (IF AN INPUT IS GREYSCALE) TO JUST CHANGE TO RGB FORMAT
 #TODO: i think we shoudl just assume (and hence modify to fit) an rgb format for all
@@ -36,14 +38,14 @@ def naive_image(layer_matrices, image_matrices):
     Description:
 
     Inputs:
-        layer_matrices: A 3 dimensional np array of size l x m x n, the highest 
-        dimension (l) being the number of layers/labels obtained from semantic 
+        layer_matrices: A 3 dimensional np array of size l x m x n, the highest
+        dimension (l) being the number of layers/labels obtained from semantic
         segmentation. Each matrix (m x n) is a matrix of 1s and 0s
-        
-        #TODO: figure out this parameter, basically maybe a list of different 
+
+        #TODO: figure out this next parameter, basically maybe a list of different
         secondary inputs (null | m x n x ? image | m x n x ? x f video)
 
-        image_matrices: a 4 dimensional np array of size l x m x n x 3. It contains the 
+        image_matrices: a 4 dimensional np array of size l x m x n x 3. It contains the
         logic of what image will replace the given layer. Resizing assumed to have occured eariler
 
 
@@ -51,12 +53,11 @@ def naive_image(layer_matrices, image_matrices):
         a m x n x 3 matrix that contains values of final image
     '''
 
-    #TODO: add another dimension?
+    #TODO: of size l x m x n x 3
     processed_matrices = np.empty((image_matrices.shape))
 
     for i in range(layer_matrices.shape[0]): #loop through layers -- main loop
-        #TODO: because of the , even with video, it might be worth doing 
-        # one layer at a time
+
 
         #first retrieve specific image and layer
         layer_matrix = layer_matrices[i]
@@ -64,7 +65,7 @@ def naive_image(layer_matrices, image_matrices):
 
         #then send to processing method
         processed_matrix = get_processed_matrix(image_matrix, layer_matrix)
-        
+
         #and add to processed matrices array
         processed_matrices[i] = processed_matrix
 
@@ -77,28 +78,41 @@ def naive_image(layer_matrices, image_matrices):
 #"naive_image" could get called for each frame in a video, -- if sequence is only
 #one frame (basically just an image), then just return one summed image
 
-def naive_video(layer_matrices): 
+def naive_video(frame_layer_matrices, frame_image_matrices):
 '''
     Description:
 
     Inputs:
-        layer_matrices: An f x l x m x n 
+        layer_matrices: A 4 dimensional np matrix of size f x l x m x n
+        f is each frame, l is the amount of layers,
+        m is width and n is height of image
+
+        image_matrices: A 5 dimensional np matrix of size f x l x m x n x 3
+        f is each frame, l is the amount of layers,
+        m is width and n is height of image, 3 is the RGB dimensions
 
     Outputs:
+        a f x m x n x 3 matrix that represents the image sequence of the completed
+        video
 
     '''
 
+    output_frames = np.empty((image_matrix.shape[0], image_matrix.shape[2], image_matrix.shape[3], 3))
+
     for i in range(layer_matrices.shape[0]): #for every frame
         #naive_image gets called here preferably
-    
+        frame = naive_image(layer_matrices[i], image_matrices[i])
+        output_frames[i] = frame
+
+    return output_frames
 
 def pre_layerReplace():
     '''
     Description:
-    Method called immediately after front end receives confirmation that all the 
+    Method called immediately after front end receives confirmation that all the
     secondary inputs are ready.
-    Transforms inputs obtained from front-end into proper inputs for back-end 
-    (such as, resizing, converting videos to image sequences, maybe more) 
+    Transforms inputs obtained from front-end into proper inputs for back-end
+    (such as, resizing, converting videos to image sequences, maybe more)
     to then call naive_video with modified and organized parameters
 
     Inputs:
@@ -107,4 +121,9 @@ def pre_layerReplace():
     Outputs:
 
     '''
-    
+
+
+
+
+    #TODO: need to start implementing with PyAV and creating a front end
+    #And maybe also PIMS? -- probablty also PIMS actually
