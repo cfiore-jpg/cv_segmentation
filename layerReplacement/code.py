@@ -33,7 +33,7 @@ def get_processed_matrix(image_matrix, layer_matrix):
     processed[:][:][2] = np.matmul(layer_matrix, image_matrix[:][:][2])
     return processed
 
-def naive_image(layer_matrices, image_matrices):
+def naive_image(image_matrices, layer_matrices):
     '''
     Description:
 
@@ -78,30 +78,32 @@ def naive_image(layer_matrices, image_matrices):
 #"naive_image" could get called for each frame in a video, -- if sequence is only
 #one frame (basically just an image), then just return one summed image
 
-def naive_video(frame_layer_matrices, frame_image_matrices):
-'''
-    Description:
+def naive_video(frame_image_matrices, frame_layer_matrices):
+    '''
+        Description:
 
-    Inputs:
-        layer_matrices: A 4 dimensional np matrix of size f x l x m x n
-        f is each frame, l is the amount of layers,
-        m is width and n is height of image
+        Inputs:
+            frame_image_matrices: A 5 dimensional np matrix of size f x l x m x n x 3
+            f is each frame, l is the amount of layers,
+            m is width and n is height of image, 3 is the RGB dimensions
 
-        image_matrices: A 5 dimensional np matrix of size f x l x m x n x 3
-        f is each frame, l is the amount of layers,
-        m is width and n is height of image, 3 is the RGB dimensions
+            layer_matrices: A 4 dimensional np matrix of size f x l x m x n
+            f is each frame, l is the amount of layers,
+            m is width and n is height of image. 
+            Contains matrices of 1s and 0s
 
-    Outputs:
-        a f x m x n x 3 matrix that represents the image sequence of the completed
-        video
+            
+        Outputs:
+            a f x m x n x 3 matrix that represents the image sequence of the completed
+            video
 
     '''
 
-    output_frames = np.empty((image_matrix.shape[0], image_matrix.shape[2], image_matrix.shape[3], 3))
+    output_frames = np.empty((frame_image_matrices.shape[0], frame_image_matrices.shape[2], frame_image_matrices.shape[3], 3))
 
-    for i in range(layer_matrices.shape[0]): #for every frame
+    for i in range(frame_layer_matrices.shape[0]): #for every frame
         #naive_image gets called here preferably
-        frame = naive_image(layer_matrices[i], image_matrices[i])
+        frame = naive_image(frame_image_matrices[i], frame_layer_matrices[i])
         output_frames[i] = frame
 
     return output_frames
