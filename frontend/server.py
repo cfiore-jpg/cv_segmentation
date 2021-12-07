@@ -1,12 +1,15 @@
 import os
 from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
+from cv_segmentation.layerReplacement.layer_replacement import *
+
 
 UPLOAD_FOLDER = os.getcwd()
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'} #additional extensions, .mp4, .mov, .tiff, .avi
-
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'} #additional extensions, .mp4, .mov, .tiff, .avi
+
+
 
 # Takes in a filename and verifies whether it is in the bounds of the allowed
 # extensions
@@ -62,6 +65,9 @@ def upload_file():
 def display_list(list):
     return list
 
+def replace_layers(list):
+    return list
+
 @app.route('/', methods=['GET', 'POST'])
 # Runs the upload method and returns the rendered page
 def index():
@@ -73,6 +79,8 @@ def index():
 
 #need to figure out how to link images in the secondary_inputs folder with the layer
 #they need to replace
+
+#add segment button, write todo w/ empty function
 
 
 
