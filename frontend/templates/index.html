@@ -7,15 +7,30 @@
 </head>
 <body>
    <h1>Segmentation App!</h1>
+        <h2>Upload a Primary Input</h2>
         <form method=post enctype=multipart/form-data>
             <input type=file name=file>
             <input type=submit value=Upload>
         </form>
         <a class="upload-result">
             {% if upload_return %}
-            <h2>{{upload_return}}</h2>
+            <h3>{{upload_return}}</h3>
             {% endif %}
         </a>
+        <h4>Upload Secondary Inputs for Whichever Layers You Want</h4>
+        {% if list %}
+        <nav>
+            <ul>
+                {%for i in range(0, list_len)%}
+                    <li>{{list[i]}}</li>
+                    <form method=post enctype=multipart/form-data class=secondary-input>
+                        <input type=file name=secondary_input>
+                        <input type=submit value=Upload>
+                    </form>
+                {%endfor%}
+            </ul>
+        </nav>
+        {% endif %}
         
 </body>
 </html>
