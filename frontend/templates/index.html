@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <title>Segmentation App</title>
+</head>
+<body>
+   <h1>Segmentation App!</h1>
+        <form method=post enctype=multipart/form-data>
+            <input type=file name=file>
+            <input type=submit value=Upload>
+        </form>
+        <a class="upload-result">
+            {% if upload_return %}
+            <h2>{{upload_return}}</h2>
+            {% endif %}
+        </a>
+        
+</body>
+</html>
