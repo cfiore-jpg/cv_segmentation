@@ -1,65 +1,96 @@
-'''
-Description:
-    Extract the uniform data for training and testing.
-'''
+from glob import glob
+import shutil
+import argparse
+import zipfile
+import hashlib
+import requests
+from tqdm import tqdm
+import IPython.display as display
+import matplotlib.pyplot as plt
 import numpy as np
-import skimage.io
-import scipy.io
-import os
+import tensorflow as tf
+import datetime, os
+from tensorflow.keras.layers import *
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
+from tensorflow.keras.optimizers import Adam
+from IPython.display import clear_output
+import tensorflow_addons as tfa
 
 
+def check_sha1(filename, sha1_hash):
+    sha1 = hashlib.sha1()
+    with open(filename, 'rb') as f:
+        while True:
+            data = f.read(1048576)
+            if not data:
+                break
+            sha1.update(data)
 
-def selectSameShapeDataID(img_path):
-    imgs_filename = os.listdir(img_path)
-    imgs_filename = [each for each in imgs_filename if "2007_" not in each]
-    res_list = []
-    for f in imgs_filename:
-        img_data =  skimage.io.imread("{}/{}".format(img_path, f))
-        if img_data.shape[0] == 442 and img_data.shape[1] == 500:
-            res_list.append(f.split(".")[0])
-    print("The number of imges with the same shape : {}".format(len(res_list)))
-    np.save("./same_shape_img_id.npy", res_list)
+    sha1_file = sha1.hexdigest()
+    l = min(len(sha1_file), len(sha1_hash))
+    return sha1.hexdigest()[0:l] == sha1_hash[0:l]
 
 
-def extractData(img_path, annotation_path, selected_img_id):
-    selected_img_id = list(np.load(selected_img_id, allow_pickle=True))
-    # parse filenames
-    annot_filename = os.listdir(annotation_path)
-    annot_filename = [each for each in annot_filename]
-    annot_id = [each.split(".")[0] for each in annot_filename]
+def download(url, path=None, overwrite=False, sha1_hash=None):
+    if path is None:
+        fname = url.split('/')[-1]
+    else:
+        path = os.path.expanduser(path)
+        if os.path.isdir(path):
+            fname = os.path.join(path, url.split('/')[-1])
+        else:
+            fname = path
 
-    imgs_filename = os.listdir(img_path)
-    imgs_filename = [each for each in imgs_filename]
-    img_id = [each.split(".")[0] for each in imgs_filename]
+    if overwrite or not os.path.exists(fname) or (sha1_hash and not check_sha1(fname, sha1_hash)):
+        dirname = os.path.dirname(os.path.abspath(os.path.expanduser(fname)))
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
 
-    selected_img_id = [each for each in selected_img_id if "2007_" not in each and each in annot_id and each in img_id]
-    print("{} images to be loaded...".format(len(selected_img_id)))
+        print('Downloading %s from %s...'%(fname, url))
+        r = requests.get(url, stream=True)
+        if r.status_code != 200:
+            raise RuntimeError("Failed downloading url %s"%url)
+        total_length = r.headers.get('content-length')
+        with open(fname, 'wb') as f:
+            if total_length is None: # no content length header
+                for chunk in r.iter_content(chunk_size=1024):
+                    if chunk: # filter out keep-alive new chunks
+                        f.write(chunk)
+            else:
+                total_length = int(total_length)
+                for chunk in tqdm(r.iter_content(chunk_size=1024),
+                                  total=int(total_length / 1024. + 0.5),
+                                  unit='KB', unit_scale=False, dynamic_ncols=True):
+                    f.write(chunk)
 
-    imgs_filename = ["{}.jpg".format(each) for each in selected_img_id]
-    annot_filename = ["{}.mat".format(each) for each in selected_img_id]
+        if sha1_hash and not check_sha1(fname, sha1_hash):
+            raise UserWarning('File {} is downloaded but the content hash does not match. ' \
+                              'The repo may be outdated or download may be incomplete. ' \
+                              'If the "repo_url" is overridden, consider switching to ' \
+                              'the default repo.'.format(fname))
 
-    # images loading
-    img_data = np.asarray([
-        skimage.io.imread("{}/{}".format(img_path, each))
-        for each in imgs_filename
-    ])
-    # annotation loading
-    annot_data = np.asarray([
-        scipy.io.loadmat("{}/{}".format(annotation_path, each))["LabelMap"]
-        for each in annot_filename
-    ])
-    return img_data, annot_data
+    return fname
 
+
+def download_ade(path, overwrite=False):
+
+    """Download ADE20K"""
+
+    if not os.path.exists(path):
+        os.mkdir(path)
+    _AUG_DOWNLOAD_URLS = [
+      ('http://data.csail.mit.edu/places/ADEchallenge/ADEChallengeData2016.zip', '219e1696abb36c8ba3a3afe7fb2f4b4606a897c7'),
+      ('http://data.csail.mit.edu/places/ADEchallenge/release_test.zip', 'e05747892219d10e9243933371a497e905a4860c'),]
+    download_dir = os.path.join(path, 'downloads')
+    if not os.path.exists(download_dir):
+        os.mkdir(download_dir)
+    for url, checksum in _AUG_DOWNLOAD_URLS:
+        filename = download(url, path=download_dir, overwrite=overwrite, sha1_hash=checksum)
+        # extract
+        with zipfile.ZipFile(filename,"r") as zip_ref:
+            zip_ref.extractall(path=path)
 
 if __name__ == '__main__':
-    img_path = "../data/dataset/VOC2010/JPEGImages/"
-    selectSameShapeDataID(img_path)
-    # ------------------------------------
-    annotation_path = "../data/annotations/"
-    selected_img_id = "./same_shape_img_id.npy"
-    img_data, annot_data = extractData(img_path, annotation_path, selected_img_id)
-    print("Img data shape : ", img_data.shape)
-    print("Annot data shape : ", annot_data.shape)
-    np.save("./selected_img_data.npy", img_data)
-    np.save("./selected_annot_data.npy", annot_data)
+    root = root = "./data"
+    download_ade(root, overwrite=False)
 
