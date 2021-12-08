@@ -1,7 +1,6 @@
 import numpy as np
-#import av
 from skimage.transform import resize
-#import pims
+import pims
 
 #TODO:CONSIDER TO (IF AN INPUT IS GREYSCALE) TO JUST CHANGE TO RGB FORMAT
 #TODO: i think we shoudl just assume (and hence modify to fit) an rgb format for all
