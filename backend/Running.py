@@ -39,7 +39,7 @@ def train(model, dataset_path, load=False):
     print("done")
     STEPS_PER_EPOCH = TRAINSET_SIZE // BATCH_SIZE
     VALIDATION_STEPS = VALSET_SIZE // BATCH_SIZE
-    EPOCHS = 14
+    EPOCHS = 20
     
     logdir = os.path.join("./backend/logs", datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
     tensorboard_callback = tf.keras.callbacks.TensorBoard(logdir, histogram_freq=1)
