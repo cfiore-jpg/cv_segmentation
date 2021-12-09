@@ -67,7 +67,7 @@ def build_UNET(img_size, n_channels, n_classes):
     output = Activation("softmax")(x)
     
     model = tf.keras.Model(inputs = inputs, outputs = output)
-    model.compile(optimizer=tfa.optimizers.RectifiedAdam(lr=1e-3), loss = tf.keras.losses.SparseCategoricalCrossentropy(),
+    model.compile(optimizer=tfa.optimizers.Adadelta, loss = tf.keras.losses.SparseCategoricalCrossentropy(),
               metrics=['accuracy'])
     model.summary()
     return model
