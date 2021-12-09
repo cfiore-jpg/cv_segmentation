@@ -55,7 +55,7 @@ def train(model, dataset_path, load=False):
         model = tf.keras.models.load_model('./backend/best_model_unet.h5')
         print("done")
         
-    print("Let's train...)
+    print("Let's train...")
     model_history = model.fit(dataset['train'], epochs=EPOCHS,
                     steps_per_epoch=STEPS_PER_EPOCH,
                     validation_steps=VALIDATION_STEPS,
