@@ -52,7 +52,7 @@ def train(model, dataset_path, load=False):
     
     if load:
         print("Loading model...", end=' ')
-        model = tf.keras.models.load_model('./backend/best_model_unet.h5')
+        model.load_weights('./backend/best_model_unet.h5')
         print("done")
         
     print("Let's train...")
