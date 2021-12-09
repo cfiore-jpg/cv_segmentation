@@ -22,7 +22,7 @@ def build_UNET(img_size, n_channels, n_classes):
     inputs = Input(shape=input_size)
     
     #Encoder---------------------------------
-    x = Conv2D(64, 3, 3, padding="same")(x)
+    x = Conv2D(64, 3, 3, padding="same")(inputs)
     x = BatchNormalization()(x)
     x = Activation("relu")(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
