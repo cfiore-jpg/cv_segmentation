@@ -34,7 +34,9 @@ class DisplayCallback(tf.keras.callbacks.Callback):
         print ('\nSample Prediction after epoch {}\n'.format(epoch+1))
 
 def train(model, dataset_path, load=False):
+    print("Gathering the data...", end=' ')
     dataset, TRAINSET_SIZE, VALSET_SIZE, BATCH_SIZE = prepare_data(dataset_path)
+    print("done")
     STEPS_PER_EPOCH = TRAINSET_SIZE // BATCH_SIZE
     VALIDATION_STEPS = VALSET_SIZE // BATCH_SIZE
     EPOCHS = 14
@@ -49,8 +51,11 @@ def train(model, dataset_path, load=False):
     tf.keras.callbacks.ModelCheckpoint('./backend/best_model_unet.h5', verbose=1, save_best_only=True, save_weights_only=True)]
     
     if load:
+        print("Loading model...", end=' ')
         model = tf.keras.models.load_model('./backend/best_model_unet.h5')
-
+        print("done")
+        
+    print("Let's train...)
     model_history = model.fit(dataset['train'], epochs=EPOCHS,
                     steps_per_epoch=STEPS_PER_EPOCH,
                     validation_steps=VALIDATION_STEPS,
