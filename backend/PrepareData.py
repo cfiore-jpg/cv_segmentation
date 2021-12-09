@@ -87,17 +87,17 @@ def prepare_data(dataset_path):
     VALSET_SIZE = len(glob(dataset_path + "validation/" + "*.jpg"))
     print(f"The Validation Dataset contains {VALSET_SIZE} images.")
     
-    train_dataset = tf.data.Dataset.list_files(dataset_path + "training/" + "*.jpg")
+    train_dataset = tf.data.Dataset.list_files(dataset_path + "training/" + "*.jpg", seed=42)
     train_dataset = train_dataset.map(parse_image)
     
-    val_dataset = tf.data.Dataset.list_files(dataset_path + "validation/" + "*.jpg")
+    val_dataset = tf.data.Dataset.list_files(dataset_path + "validation/" + "*.jpg", seed=42)
     val_dataset =val_dataset.map(parse_image)
 
     dataset = {"train": train_dataset, "val": val_dataset}
 
     # -- Train Dataset --#
     dataset['train'] = dataset['train'].map(load_image_train, num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    dataset['train'] = dataset['train'].shuffle(buffer_size=BUFFER_SIZE)
+    dataset['train'] = dataset['train'].shuffle(buffer_size=BUFFER_SIZE, seed=42)
     dataset['train'] = dataset['train'].repeat()
     dataset['train'] = dataset['train'].batch(BATCH_SIZE)
     dataset['train'] = dataset['train'].prefetch(buffer_size=AUTOTUNE)
