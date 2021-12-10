@@ -75,7 +75,7 @@ def build_UNET(img_size, n_channels, n_classes):
     # -- Dencoder -- #
     output = Conv2D(n_classes, 1, activation = 'softmax')(conv_dec_4)
     model = tf.keras.Model(inputs = inputs, outputs = output)
-    model.compile(optimizer=tfa.optimizers.RectifiedAdam(lr=5e-4), loss = tf.keras.losses.SparseCategoricalCrossentropy(),
+    model.compile(optimizer=tfa.optimizers.RectifiedAdam(lr=1e-3), loss = tf.keras.losses.SparseCategoricalCrossentropy(),
               metrics=['accuracy'])
     model.summary()
     return model
