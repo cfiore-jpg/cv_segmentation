@@ -65,4 +65,4 @@ def train(model, dataset_path, load=False):
 if __name__ == '__main__':
     dataset_path = "./data/ADEChallengeData2016/images/"
     model = build_UNET(128, 3, 151)
-    train(model, dataset_path, True)
+    train(model, dataset_path)
