@@ -2,11 +2,10 @@ import numpy as np
 from skimage.transform import resize
 import pims
 
-#TODO:CONSIDER TO (IF AN INPUT IS GREYSCALE) TO JUST CHANGE TO RGB FORMAT
-#TODO: i think we shoudl just assume (and hence modify to fit) an rgb format for all
-#images and videos
 
-
+# TODO:CONSIDER TO (IF AN INPUT IS GREYSCALE) TO JUST CHANGE TO RGB FORMAT
+# TODO: i think we shoudl just assume (and hence modify to fit) an rgb format for all
+# images and videos
 
 
 def get_processed_matrix(image_matrix, layer_matrix):
@@ -24,13 +23,14 @@ def get_processed_matrix(image_matrix, layer_matrix):
         layer_matrix had 1s in the same spot.
 
     '''
-    #TODO:here assuming that image matrix is rgb, be extensible and check if grey or RGBA\
-    #TODO:return in similar format? -- hmmmm might fuck with addition at end of process(?)
+    # TODO:here assuming that image matrix is rgb, be extensible and check if grey or RGBA\
+    # TODO:return in similar format? -- hmmmm might fuck with addition at end of process(?)
     processed = image_matrix
     processed[:][:][0] = np.matmul(layer_matrix, image_matrix[:][:][0])
     processed[:][:][1] = np.matmul(layer_matrix, image_matrix[:][:][1])
     processed[:][:][2] = np.matmul(layer_matrix, image_matrix[:][:][2])
     return processed
+
 
 def naive_image(image_matrices, layer_matrices):
     '''
@@ -52,33 +52,33 @@ def naive_image(image_matrices, layer_matrices):
         a m x n x 3 matrix that contains values of final image
     '''
 
-    #TODO: of size l x m x n x 3
+    # TODO: of size l x m x n x 3
     processed_matrices = np.empty((image_matrices.shape))
 
-    for i in range(layer_matrices.shape[0]): #loop through layers -- main loop
+    for i in range(layer_matrices.shape[0]):  # loop through layers -- main loop
 
-
-        #first retrieve specific image and layer
+        # first retrieve specific image and layer
         layer_matrix = layer_matrices[i]
         image_matrix = image_matrices[i]
 
-        #then send to processing method
+        # then send to processing method
         processed_matrix = get_processed_matrix(image_matrix, layer_matrix)
 
-        #and add to processed matrices array
+        # and add to processed matrices array
         processed_matrices[i] = processed_matrix
 
-    #unsure if proper axis, i think its right TODO: confirm this
+    # unsure if proper axis, i think its right TODO: confirm this
     summed_image = np.sum(processed_matrices, axis=0)
 
     return summed_image
 
-#TODO:review written code, maybe start extending over to multiple frames
-#"naive_image" could get called for each frame in a video, -- if sequence is only
-#one frame (basically just an image), then just return one summed image
+
+# TODO:review written code, maybe start extending over to multiple frames
+# "naive_image" could get called for each frame in a video, -- if sequence is only
+# one frame (basically just an image), then just return one summed image
 
 def naive_video(frame_image_matrices, frame_layer_matrices):
-    '''
+    """
         Description:
 
         Inputs:
@@ -88,26 +88,28 @@ def naive_video(frame_image_matrices, frame_layer_matrices):
 
             layer_matrices: A 4 dimensional np matrix of size f x l x m x n
             f is each frame, l is the amount of layers,
-            m is width and n is height of image. 
+            m is width and n is height of image.
             Contains matrices of 1s and 0s
 
-            
+
         Outputs:
             a f x m x n x 3 matrix that represents the image sequence of the completed
             video
 
-    '''
+    """
 
-    output_frames = np.empty((frame_image_matrices.shape[0], frame_image_matrices.shape[2], frame_image_matrices.shape[3], 3))
+    output_frames = np.empty(
+        (frame_image_matrices.shape[0], frame_image_matrices.shape[2], frame_image_matrices.shape[3], 3))
 
-    for i in range(frame_layer_matrices.shape[0]): #for every frame
-        #naive_image gets called here preferably
+    for i in range(frame_layer_matrices.shape[0]):  # for every frame
+        # naive_image gets called here preferably
         frame = naive_image(frame_image_matrices[i], frame_layer_matrices[i])
         output_frames[i] = frame
 
     return output_frames
 
-def pre_layerReplace():
+
+def pre_layer_replace():
     '''
     Description:
     Method called immediately after front end receives confirmation that all the
@@ -123,8 +125,5 @@ def pre_layerReplace():
 
     '''
 
-
-
-
-    #TODO: need to start implementing with PyAV and creating a front end
-    #And maybe also PIMS? -- probablty also PIMS actually
+    # TODO: need to start implementing with PyAV and creating a front end
+    # And maybe also PIMS? -- probablty also PIMS actually
