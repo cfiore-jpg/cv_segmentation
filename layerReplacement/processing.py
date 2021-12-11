@@ -29,7 +29,6 @@ def make_layer_matrices(semantic_output):
 
     for layer_index, layer_number in enumerate(unique_layers):
         for frame_index, frame in enumerate(semantic_output):
-            
             layer_matrix = np.where((frame == layer_number),
                                     ones_array,
                                     zeros_array)
@@ -73,4 +72,17 @@ def test_pims(filepath):
 
     print(images[0].shape)
 
+
 # TODO: incorporate a pims-pipeline method
+
+def pre_layer_replace():
+    """
+   Description:
+
+   Inputs:
+
+   Outputs:
+
+   """
+
+    # TODO: fill this out. layer_replacement.py gets used here finally

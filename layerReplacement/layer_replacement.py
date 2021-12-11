@@ -3,13 +3,8 @@ from skimage.transform import resize
 import pims
 
 
-# TODO:CONSIDER TO (IF AN INPUT IS GREYSCALE) TO JUST CHANGE TO RGB FORMAT
-# TODO: i think we shoudl just assume (and hence modify to fit) an rgb format for all
-# images and videos
-
-
-def get_processed_matrix(image_matrix, layer_matrix):
-    '''
+def get_processed_matrix(layer_matrix, image_matrix):
+    """
     Description:
 
     Inputs:
@@ -22,9 +17,8 @@ def get_processed_matrix(image_matrix, layer_matrix):
         An m x n x 3. Will have values identical to image_matrix, but only where
         layer_matrix had 1s in the same spot.
 
-    '''
-    # TODO:here assuming that image matrix is rgb, be extensible and check if grey or RGBA\
-    # TODO:return in similar format? -- hmmmm might fuck with addition at end of process(?)
+    """
+
     processed = image_matrix
     processed[:][:][0] = np.matmul(layer_matrix, image_matrix[:][:][0])
     processed[:][:][1] = np.matmul(layer_matrix, image_matrix[:][:][1])
@@ -32,98 +26,75 @@ def get_processed_matrix(image_matrix, layer_matrix):
     return processed
 
 
-def naive_image(image_matrices, layer_matrices):
-    '''
-    Description:
-
-    Inputs:
-        layer_matrices: A 3 dimensional np array of size l x m x n, the highest
-        dimension (l) being the number of layers/labels obtained from semantic
-        segmentation. Each matrix (m x n) is a matrix of 1s and 0s
-
-        #TODO: figure out this next parameter, basically maybe a list of different
-        secondary inputs (null | m x n x ? image | m x n x ? x f video)
-
-        image_matrices: a 4 dimensional np array of size l x m x n x 3. It contains the
-        logic of what image will replace the given layer. Resizing assumed to have occured eariler
-
-
-    Outputs:
-        a m x n x 3 matrix that contains values of final image
-    '''
-
-    # TODO: of size l x m x n x 3
-    processed_matrices = np.empty((image_matrices.shape))
-
-    for i in range(layer_matrices.shape[0]):  # loop through layers -- main loop
-
-        # first retrieve specific image and layer
-        layer_matrix = layer_matrices[i]
-        image_matrix = image_matrices[i]
-
-        # then send to processing method
-        processed_matrix = get_processed_matrix(image_matrix, layer_matrix)
-
-        # and add to processed matrices array
-        processed_matrices[i] = processed_matrix
-
-    # unsure if proper axis, i think its right TODO: confirm this
-    summed_image = np.sum(processed_matrices, axis=0)
-
-    return summed_image
-
-
-# TODO:review written code, maybe start extending over to multiple frames
-# "naive_image" could get called for each frame in a video, -- if sequence is only
-# one frame (basically just an image), then just return one summed image
-
-def naive_video(frame_image_matrices, frame_layer_matrices):
+def naive_layer_frames(layer_matrices, filepath):
     """
         Description:
 
         Inputs:
-            frame_image_matrices: A 5 dimensional np matrix of size f x l x m x n x 3
-            f is each frame, l is the amount of layers,
+            frame_image_matrices: a string that contains a filepath to an image/video
+            of size f x m x n x 3
+            f is each frame,
             m is width and n is height of image, 3 is the RGB dimensions
+            if it is an image, f will simply be length 1
 
-            layer_matrices: A 4 dimensional np matrix of size f x l x m x n
-            f is each frame, l is the amount of layers,
+            layer_matrices: A 3 dimensional np matrix of size f x m x n
+            f is each frame,
             m is width and n is height of image.
             Contains matrices of 1s and 0s
 
 
         Outputs:
-            a f x m x n x 3 matrix that represents the image sequence of the completed
-            video
+            a f x m x n x 3 matrix that represents the image sequence of the specific layer
 
     """
 
-    output_frames = np.empty(
-        (frame_image_matrices.shape[0], frame_image_matrices.shape[2], frame_image_matrices.shape[3], 3))
+    images = pims.open(filepath)
 
-    for i in range(frame_layer_matrices.shape[0]):  # for every frame
-        # naive_image gets called here preferably
-        frame = naive_image(frame_image_matrices[i], frame_layer_matrices[i])
-        output_frames[i] = frame
+    frame_count = images.shape[0]  # TODO: check if legal
+
+    output_frames = np.empty(
+        (layer_matrices.shape[0], layer_matrices.shape[1], layer_matrices.shape[2], 3))
+
+    for i in range(layer_matrices):  # for each frame
+        if frame_count == 1:  # if there is only 1 frame == just an image, so keep using only that
+            image_frame = images[0]  # TODO: optimize this?
+        elif i < frame_count:  # else, its a video, so check that secondary input has not fallen short
+            image_frame = images[i]
+        else:  # if it has, then just freeze frame last frame of secondary input
+            image_frame = images[-1]
+
+        # TODO: resize image_frame occurs here
+        frame_layer_matrix = layer_matrices[i]
+        processed_matrix = get_processed_matrix(frame_layer_matrix, image_frame)
+        output_frames[i] = processed_matrix
 
     return output_frames
 
 
-def pre_layer_replace():
-    '''
+def layer_replace(layer_matrices, secondary_filepaths):
+    """
     Description:
-    Method called immediately after front end receives confirmation that all the
-    secondary inputs are ready.
-    Transforms inputs obtained from front-end into proper inputs for back-end
-    (such as, resizing, converting videos to image sequences, maybe more)
-    to then call naive_video with modified and organized parameters
 
     Inputs:
+    layer_matrices: an l x f x m x n np array the contains m x n matrices of 1s and 0s for each layer
+                    of each frame
 
-
+    secondary_filepaths: a 1-D python list of strings that contain the filepaths to all final images/videos
+                         for layer replacement
     Outputs:
+    An f x m x n x 3 image sequence that represents the final video
 
-    '''
+    """
+    # produce a 5 dimensional l x f x m x n x 3 np array that will contain the final video data
+    final_video = np.empty((layer_matrices.shape[0], layer_matrices.shape[1], layer_matrices.shape[2],
+                            layer_matrices.shape[3], 3))
 
-    # TODO: need to start implementing with PyAV and creating a front end
-    # And maybe also PIMS? -- probablty also PIMS actually
+    for layer_index, each_layer in enumerate(layer_matrices):  # for each layer
+
+        layer_sequence = naive_layer_frames(each_layer, secondary_filepaths[layer_index])
+        final_video[layer_index] = layer_sequence
+
+    # compress final video to a 4 dimensional array that is a final sequence of images
+    final_video = np.sum(final_video, axis=0)
+
+    return final_video
