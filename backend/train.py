@@ -27,24 +27,24 @@ def train_by_fit(model, epochs, train_gen, test_gen, train_steps, test_steps):
     optimizer = tfa.optimizers.RectifiedAdam(lr=1e-3)
     loss = tf.keras.losses.SparseCategoricalCrossentropy()
 
-    # trainable_layer = 92
-#     trainable_layer = 19
-#     for i in range(trainable_layer):
-#         print(model.layers[i].name)
-#         model.layers[i].trainable = False
-#     print('freeze the first {} layers of total {} layers.'.format(trainable_layer, len(model.layers)))
+    trainable_layer = 92
+    trainable_layer = 19
+    for i in range(trainable_layer):
+        print(model.layers[i].name)
+        model.layers[i].trainable = False
+    print('freeze the first {} layers of total {} layers.'.format(trainable_layer, len(model.layers)))
 
-#     model.compile(optimizer=optimizer,
-#                   loss=loss,
-#                   metrics=['accuracy'])
+    model.compile(optimizer=optimizer,
+                  loss=loss,
+                  metrics=['accuracy'])
 
-#     model.fit(train_gen,
-#               steps_per_epoch=train_steps,
-#               validation_data=test_gen,
-#               validation_steps=test_steps,
-#               epochs=epochs,
-#               callbacks=cbk,
-#               shuffle=True)
+    model.fit(train_gen,
+              steps_per_epoch=train_steps,
+              validation_data=test_gen,
+              validation_steps=test_steps,
+              epochs=epochs,
+              callbacks=cbk,
+              shuffle=True)
 
     for i in range(len(model.layers)):
         model.layers[i].trainable = True
