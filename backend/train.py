@@ -74,7 +74,7 @@ if __name__ == '__main__':
 
 
     model = SegNet((128, 128, 3), 151)
-    model.load_weights('./backend/epoch=35_val_loss=2.7978.h5')
+    model.load_weights('./backend/best_weights.h5')
     model.summary()
 
     dataset, TRAINSET_SIZE, VALSET_SIZE, BATCH_SIZE = prepare_data("./data/ADEChallengeData2016/images/")
