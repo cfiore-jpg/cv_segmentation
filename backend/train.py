@@ -20,7 +20,7 @@ def train_by_fit(model, epochs, train_gen, test_gen, train_steps, test_steps):
 
     cbk = [
         callbacks.ModelCheckpoint(
-            './backend/epoch={epoch:02d}_val_loss={val_loss:.04f}.h5',
+            './backend/best_weights.h5',
             save_weights_only=True, save_best_only=True)
     ]
 
@@ -74,6 +74,7 @@ if __name__ == '__main__':
 
 
     model = SegNet((128, 128, 3), 151)
+    model.load_weights('./backend/epoch=35_val_loss=2.7978.h5')
     model.summary()
 
     dataset, TRAINSET_SIZE, VALSET_SIZE, BATCH_SIZE = prepare_data("./data/ADEChallengeData2016/images/")
