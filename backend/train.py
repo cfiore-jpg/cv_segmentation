@@ -84,4 +84,4 @@ if __name__ == '__main__':
     train_gen = dataset['train']
     test_gen = dataset['val']
 
-    train_by_fit(model, 20, train_gen, test_gen, train_steps, test_steps)
+    train_by_fit(model, 40, train_gen, test_gen, train_steps, test_steps)
