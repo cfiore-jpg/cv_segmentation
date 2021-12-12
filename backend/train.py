@@ -24,7 +24,7 @@ def train_by_fit(model, epochs, train_gen, test_gen, train_steps, test_steps):
             save_weights_only=True, save_best_only=True)
     ]
 
-    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-3)
+    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4)
     loss = tf.keras.losses.SparseCategoricalCrossentropy()
 
     # trainable_layer = 92
