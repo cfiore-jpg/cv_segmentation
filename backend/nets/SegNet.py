@@ -126,7 +126,7 @@ def SegNet(input_shape, num_classes):
     x = layers.Conv2D(num_classes, (1, 1), padding='valid', kernel_initializer='he_uniform')(x)
     outputs = layers.BatchNormalization()(x)
 
-    outputs = layers.Activation('softmax')(x)
+#     outputs = layers.Activation('softmax')(x)
 
     segnet_model = models.Model(inputs=inputs, outputs=outputs, name='SegNet')
 
