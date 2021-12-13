@@ -5,6 +5,7 @@
 # @Software: PyCharm
 # @Brief: SegNet的实现
 
+import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.python.keras.utils import data_utils
 from nets.MaxPoolingWithIndices2D import MaxPoolingWithIndices2D
