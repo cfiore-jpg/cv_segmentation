@@ -5,6 +5,7 @@
 # @Software: PyCharm
 # @Brief: SegNet的实现
 
+import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.python.keras.utils import data_utils
 from nets.MaxPoolingWithIndices2D import MaxPoolingWithIndices2D
@@ -133,6 +134,33 @@ def SegNet(input_shape, num_classes):
     return segnet_model
 
 
+def display_sample(display_list):
+    plt.figure(figsize=(9, 9))
+    title = ['Input Image', 'True Mask', 'Predicted Mask']
+    for i in range(len(display_list)):
+        plt.subplot(1, len(display_list), i+1)
+        plt.title(title[i])
+        plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]))
+        plt.axis('off')
+    plt.show()
+
+
+def create_mask(pred_mask: tf.Tensor) -> tf.Tensor:
+    """Return a filter mask with the top 1 predicitons
+    """
+    pred_mask = tf.argmax(pred_mask, axis=-1)
+    pred_mask = tf.expand_dims(pred_mask, axis=-1)
+    return pred_mask
+
+
+def show_predictions(dataset, model, num=1):
+    """Show a sample prediction."""
+    for image, mask in dataset.take(num):
+        pred_mask = model.predict(image)
+        pred_mask = tf.nn.softmax(pred_mask)
+        display_sample([image[0], mask[0], create_mask(pred_mask)[0]])
+
+        
 def SegNet_VGG16(input_shape, num_classes):
     """
     VGG16作为encoder实现的SegNet
