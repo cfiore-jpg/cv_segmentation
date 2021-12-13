@@ -10,6 +10,7 @@ UPLOAD_FOLDER = os.getcwd()
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # additional extensions, .mp4, .mov, .tiff, .avi
+primary_input = None
 
 
 # Takes in a filename and verifies whether it is in the bounds of the allowed
@@ -20,6 +21,7 @@ def allowed_file(filename):
 
 # Uploads the primary input
 def upload_primary_input():
+    global primary_input
     if request.method == 'POST':
         if 'file' in request.files:
             file = request.files['file']
@@ -30,7 +32,7 @@ def upload_primary_input():
                 filename = secure_filename(file.filename)
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/primary_inputs", filename)
                 file.save(new_path)
-                #primary_input = new_path
+                primary_input = new_path
                 return new_path
     return
 
@@ -49,7 +51,8 @@ def upload_secondary_input():
                 return new_path
     return
 
-def do_segment(primary_input):
+def do_segment():
+    global counter
 
     #TODO: Check if there is an input image, this is not tested yet
      # might have to pull it from the folder and only allow one file at a time
@@ -59,6 +62,8 @@ def do_segment(primary_input):
         print("rf", request.form)
         if 'segment_button' in request.form: 
             if request.form['segment_button'] == 'Segment':
+                print("pi",primary_input)
+
                 #TODO: test_pims function here. This should in some way return the labels needed for frontend.
                 temp_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
                 return temp_list
@@ -74,10 +79,9 @@ def replace_layers(list):
 @app.route('/', methods=['GET', 'POST'])
 # Runs the upload method and returns the rendered page
 def index():
-    primary_input = upload_primary_input()
-    secondary_input = upload_secondary_input()
-    list = do_segment(primary_input)
-    print("list",list)
+    upload_primary_input()
+    upload_secondary_input()
+    list = do_segment()
     return render_template('index.html', list=list)
 
 
@@ -88,5 +92,7 @@ def index():
 # dictionary of layers to uploads
 #TODO: need permanence, secondary inputs refresh after each upload. This 
 # can be solved if we figure out global variables
+#Use this?:
+#  https://stackoverflow.com/questions/28423069/store-large-data-or-a-service-connection-per-flask-session/28426819#28426819
 # dictionary of layer numbers to layer names
 # pass list of video, image, or nothing, for each layer. Default is nothing.
