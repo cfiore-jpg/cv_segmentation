@@ -12,26 +12,26 @@
             <input type=file name=file>
             <input type=submit value=Upload>
         </form>
-        <!-- <a class="upload-result">
-            {% if upload_return %}
-            <h3>{{upload_return}}</h3>
-            {% endif %}
-        </a> -->
         <form method=post>
             <input type="submit" name="segment_button" value="Segment">
         </form>
-        {% if list %}
+        {% if have_segmented %}
         <nav>
             <ul>
-                {%for i in range(0, list|length)%}
-                    <li>{{list[i]}}</li>
-                    <form method=post enctype=multipart/form-data class=secondary-input>
+                {%for i in range(0, layer_list|length)%}
+                    {% set currlist = layer_list[i] %}
+                    <li>{{currlist}}</li>
+                    <form method=post enctype=multipart/form-data>
+                        <input type="hidden" id="index" name="index" value="{{ currlist }}">
                         <input type=file name=secondary_input>
                         <input type=submit value=Upload>
                     </form>
                 {%endfor%}
             </ul>
         </nav>
+        <form method=post>
+            <input type="submit" name="replace_button" value="Replace Layers">
+        </form>
         {% endif %}   
 </body>
 </html>

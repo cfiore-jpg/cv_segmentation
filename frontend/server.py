@@ -11,6 +11,9 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # additional extensions, .mp4, .mov, .tiff, .avi
 primary_input = None
+have_segmented = False
+layer_list = []
+
 
 
 # Takes in a filename and verifies whether it is in the bounds of the allowed
@@ -21,9 +24,10 @@ def allowed_file(filename):
 
 # Uploads the primary input
 def upload_primary_input():
-    global primary_input
+    
     if request.method == 'POST':
         if 'file' in request.files:
+            global primary_input
             file = request.files['file']
             if file.filename == '':
                 flash('No selected file')
@@ -36,11 +40,12 @@ def upload_primary_input():
                 return new_path
     return
 
-# Uploads secondary inputs
+
 def upload_secondary_input():
     if request.method == 'POST':
         if 'secondary_input' in request.files:
             secondary_input = request.files['secondary_input']
+            curr_layer = request.form['index']
             if secondary_input.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
@@ -48,32 +53,40 @@ def upload_secondary_input():
                 filename = secure_filename(secondary_input.filename)
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
                 secondary_input.save(new_path)
+                layer_dict[curr_layer] = new_path
+                print("secondary layer dict", layer_dict)
                 return new_path
     return
 
+
 def do_segment():
     global counter
+    if primary_input:
+        if request.method == 'POST':
+            if 'segment_button' in request.form: 
+                if request.form['segment_button'] == 'Segment':
 
-    #TODO: Check if there is an input image, this is not tested yet
-     # might have to pull it from the folder and only allow one file at a time
-
-   # if primary_input:
-    if request.method == 'POST':
-        print("rf", request.form)
-        if 'segment_button' in request.form: 
-            if request.form['segment_button'] == 'Segment':
-                print("pi",primary_input)
-
-                #TODO: test_pims function here. This should in some way return the labels needed for frontend.
-                temp_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
-                return temp_list
-
-def display_list(list):
-    return list
-
+                    #TODO: test_pims function here. This should return the list of labels needed for frontend.
+                    global layer_list
+                    layer_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
+                    global layer_dict
+                    layer_dict = dict.fromkeys(layer_list, "")
+                    global have_segmented
+                    have_segmented = True
+                    print("segment layer dict", layer_dict)
+                    return layer_list
+    else:
+        #no primary input, display message about uploading primary input?
+        return
 
 def replace_layers(list):
-    return list
+    if request.method == 'POST':
+        if 'segment_button' in request.form: 
+            if request.form['replace_button'] == 'Replace Layers':
+                #TODO: add replace layer algorithm here. This will be called when the replace layer
+                # button is pressed. Layers and their associated secondary_inputs are stored in layer_dict
+                return
+    return 
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -81,18 +94,12 @@ def replace_layers(list):
 def index():
     upload_primary_input()
     upload_secondary_input()
-    list = do_segment()
-    return render_template('index.html', list=list)
+    print("primary", primary_input)
+    do_segment()
+    return render_template('index.html', layer_list=layer_list, have_segmented=have_segmented)
 
 
-#TODO: Figure out how to create global variables for input_variable and dictionaries
-# for layer names. Alternative is to scrape from folders and create limits on what can
-# be uploaded and ways to clear the folders from GUI
+#TODO: Clear data folders at the beginning of each run?
 #TODO: Figure out importing functions from different files. May involve init.py
 # dictionary of layers to uploads
-#TODO: need permanence, secondary inputs refresh after each upload. This 
-# can be solved if we figure out global variables
-#Use this?:
-#  https://stackoverflow.com/questions/28423069/store-large-data-or-a-service-connection-per-flask-session/28426819#28426819
-# dictionary of layer numbers to layer names
-# pass list of video, image, or nothing, for each layer. Default is nothing.
+#TODO: pass list of video, image, or nothing, for each layer. Default is nothing.
