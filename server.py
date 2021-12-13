@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
-from cv_segmentation.layerReplacement.processing import test_pims
+from layerReplacement.processing import test_pims
 
 # from cv_segmentation.layerReplacement.layer_replacement import *
 
@@ -34,7 +34,7 @@ def upload_primary_input():
                 return redirect(request.url)
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/primary_inputs", filename)
+                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "frontend/static/data/primary_inputs", filename)
                 file.save(new_path)
                 primary_input = new_path
                 return new_path
@@ -51,7 +51,7 @@ def upload_secondary_input():
                 return redirect(request.url)
             if secondary_input and allowed_file(secondary_input.filename):
                 filename = secure_filename(secondary_input.filename)
-                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
+                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "frontend/static/data/secondary_inputs", filename)
                 secondary_input.save(new_path)
                 layer_dict[curr_layer] = new_path
                 print("secondary layer dict", layer_dict)
@@ -79,7 +79,7 @@ def do_segment():
         #no primary input, display message about uploading primary input?
         return
 
-def replace_layers(list):
+def replace_layers():
     if request.method == 'POST':
         if 'segment_button' in request.form: 
             if request.form['replace_button'] == 'Replace Layers':
