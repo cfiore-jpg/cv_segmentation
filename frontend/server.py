@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
+#from cv_segmentation.layerReplacement.processing import test_pims
 
 # from cv_segmentation.layerReplacement.layer_replacement import *
 
@@ -17,28 +18,11 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-# def download_file(name):
-#     return send_from_directory(app.config["UPLOAD_FOLDER"], name)
-
-# Uploads the primary or secondary inputs
-def upload_file():
+# Uploads the primary input
+def upload_primary_input():
     if request.method == 'POST':
-        # check if the post request has the file part
-        have_file = False
-        have_secondary = False
         if 'file' in request.files:
-            have_file = True
             file = request.files['file']
-        if 'secondary_input' in request.files:
-            have_secondary = True
-            secondary_input = request.files['secondary_input']
-        if not have_file and not have_secondary:
-            flash('No file part')
-            return redirect(request.url)
-
-        # handles primary input uploading
-        if have_file:
             if file.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
@@ -46,11 +30,15 @@ def upload_file():
                 filename = secure_filename(file.filename)
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/primary_inputs", filename)
                 file.save(new_path)
-                # url_path = os.path.join("data/uploads", filename)
-                # return redirect(url_for('download_file', name=url_path))
-                return "File uploaded to static/data/primary_inputs"
-        # handles secondary input uploading
-        if have_secondary:
+                #primary_input = new_path
+                return new_path
+    return
+
+# Uploads secondary inputs
+def upload_secondary_input():
+    if request.method == 'POST':
+        if 'secondary_input' in request.files:
+            secondary_input = request.files['secondary_input']
             if secondary_input.filename == '':
                 flash('No selected file')
                 return redirect(request.url)
@@ -58,11 +46,22 @@ def upload_file():
                 filename = secure_filename(secondary_input.filename)
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
                 secondary_input.save(new_path)
-                # url_path = os.path.join("data/uploads", filename)
-                # return redirect(url_for('download_file', name=url_path))
-                return "File uploaded to static/data/secondary_inputs"
+                return new_path
     return
 
+def do_segment(primary_input):
+
+    #TODO: Check if there is an input image, this is not tested yet
+     # might have to pull it from the folder and only allow one file at a time
+
+   # if primary_input:
+    if request.method == 'POST':
+        print("rf", request.form)
+        if 'segment_button' in request.form: 
+            if request.form['segment_button'] == 'Segment':
+                #TODO: test_pims function here. This should in some way return the labels needed for frontend.
+                temp_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
+                return temp_list
 
 def display_list(list):
     return list
@@ -75,14 +74,19 @@ def replace_layers(list):
 @app.route('/', methods=['GET', 'POST'])
 # Runs the upload method and returns the rendered page
 def index():
-    upload_return = upload_file()
-    list = display_list(
-        ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"])
-    return render_template('index.html', upload_return=upload_return, list_len=len(list), list=list)
+    primary_input = upload_primary_input()
+    secondary_input = upload_secondary_input()
+    list = do_segment(primary_input)
+    print("list",list)
+    return render_template('index.html', list=list)
 
-# 2.) Displaying list of layers with options for secondary input
 
-# need to figure out how to link images in the secondary_inputs folder with the layer
-# they need to replace
-
-# add segment button, write todo w/ empty function
+#TODO: Figure out how to create global variables for input_variable and dictionaries
+# for layer names. Alternative is to scrape from folders and create limits on what can
+# be uploaded and ways to clear the folders from GUI
+#TODO: Figure out importing functions from different files. May involve init.py
+# dictionary of layers to uploads
+#TODO: need permanence, secondary inputs refresh after each upload. This 
+# can be solved if we figure out global variables
+# dictionary of layer numbers to layer names
+# pass list of video, image, or nothing, for each layer. Default is nothing.

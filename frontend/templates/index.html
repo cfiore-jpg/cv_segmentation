@@ -12,16 +12,18 @@
             <input type=file name=file>
             <input type=submit value=Upload>
         </form>
-        <a class="upload-result">
+        <!-- <a class="upload-result">
             {% if upload_return %}
             <h3>{{upload_return}}</h3>
             {% endif %}
-        </a>
-        <h4>Upload Secondary Inputs for Whichever Layers You Want</h4>
+        </a> -->
+        <form method=post>
+            <input type="submit" name="segment_button" value="Segment">
+        </form>
         {% if list %}
         <nav>
             <ul>
-                {%for i in range(0, list_len)%}
+                {%for i in range(0, list|length)%}
                     <li>{{list[i]}}</li>
                     <form method=post enctype=multipart/form-data class=secondary-input>
                         <input type=file name=secondary_input>
@@ -30,7 +32,6 @@
                 {%endfor%}
             </ul>
         </nav>
-        {% endif %}
-        
+        {% endif %}   
 </body>
 </html>
