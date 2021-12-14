@@ -10,7 +10,7 @@ import glob
 from PIL import Image
 import cv2 as cv
 import os
-import core.config as cfg
+import backend.core.config as cfg
 
 
 class Dataset:

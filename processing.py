@@ -1,13 +1,14 @@
 import numpy as np
 import pims
 from skimage.transform import resize
-from backend.predict import inference, SegNet_VGG16
+from backend.predict import inference
+from backend.nets.SegNet import *
 import backend.core.config as cfg
-import cv2 as cv
 
 # import layer_replacement
 
 primary_input = None
+layer_matrices = None
 
 
 def open_file(file_path):
@@ -20,30 +21,68 @@ def open_file(file_path):
         Extension already approved
 
     Outputs:
-    an f x m x n np array containing segmentation output.
+    a 1 dimensional np array of size l with label numbers that correspond to each
+    layer matrix
     """
-
     images = pims.open(file_path)
 
     global primary_input
     primary_input = file_path
 
-    output_array = np.empty((len(images), images.frame_shape[0], images.frame_shape[1]))
+    # obtaining f x m x n output array
+    output_array = get_segmented_layers(images)
 
-    for frame in images:
-        frame = frame_process(frame)
-        print(frame.shape)
+    global layer_matrices
+    # passing output_array to make_layer_matrices, which takes in f x m x n
+    # and outputs l x f x m x n in 1s and 0s
+    layer_matrices, unique_layers = make_layer_matrices(output_array)
 
-    return output_array
+    return unique_layers
 
 
 def isolate_segment(frame):
-    print("something")
+    """
+    Description:
+
+    Inputs:
+        frame: an m x n x 3 "Frame" that extends np array
+
+    Outputs:
+        an m x n array of the processed segmented image
+    """
     # model = SegNet(cfg.input_shape, cfg.num_classes)
     model = SegNet_VGG16(cfg.input_shape, cfg.num_classes)
     model.load_weights("segnet_weights.h5")
 
     result = inference(model, frame)
+
+    # maybe reformat??
+
+    return result
+
+
+def get_segmented_layers(images):
+    """
+    Description:
+
+    Inputs:
+        images: a pims file with f frame, and m x n x 3 "Frames" that extend np array
+        will loop through f
+
+    Outputs:
+        an f x m x n np array containing segmentation output.
+    """
+
+    # TODO: change output_array size if desired -- future application
+    output_array = np.empty((len(images), 320, 320))
+
+    for i in range(len(images)):  # loop through every frame
+        frame = frame_process(images[i])
+        print(frame.shape)
+        layer_matrix = isolate_segment(frame)
+        output_array[i] = layer_matrix
+
+    return output_array
 
 
 @pims.pipeline
@@ -112,3 +151,9 @@ def pre_layer_replace():
    """
 
     # TODO: fill this out. layer_replacement.py gets used here finally
+
+
+if __name__ == '__main__':
+    x = 1 +2
+    print(x)
+

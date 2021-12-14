@@ -7,8 +7,8 @@
 
 from tensorflow.keras import layers, models
 from tensorflow.python.keras.utils import data_utils
-from nets.MaxPoolingWithIndices2D import MaxPoolingWithIndices2D
-from nets.MaxUnpoolingWithIndices2D import MaxUnpoolingWithIndices2D
+from backend.nets.MaxPoolingWithIndices2D import MaxPoolingWithIndices2D
+from backend.nets.MaxUnpoolingWithIndices2D import MaxUnpoolingWithIndices2D
 import os
 
 

@@ -4,9 +4,9 @@
 # @Time : 2021/5/12 16:39
 # @Software: PyCharm
 # @Brief: 预测脚本
-import core.config as cfg
-from core.dataset import resize_image_with_pad
-from nets.SegNet import *
+import backend.core.config as cfg
+from backend.core.dataset import resize_image_with_pad
+from backend.nets.SegNet import *
 import tensorflow as tf
 import os
 from PIL import Image

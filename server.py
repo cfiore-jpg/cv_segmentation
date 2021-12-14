@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, flash, request, redirect
 from werkzeug.utils import secure_filename
-from processing import test_pims
+from processing import open_file
 
 UPLOAD_FOLDER = os.getcwd()
 app = Flask(__name__)
@@ -65,7 +65,7 @@ def do_segment():
             if 'segment_button' in request.form:
 
                 if request.form['segment_button'] == 'Segment':
-                    test_pims(primary_input)
+                    open_file(primary_input)
                     #TODO: test_pims function here. This should return the list of labels needed for frontend.
                     global layer_list
                     layer_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
@@ -75,8 +75,6 @@ def do_segment():
                     have_segmented = True
                     print("segment layer dict", layer_dict)
                     return layer_list
-            #else:
-                #test2()
     else:
         #no primary input, display message about uploading primary input?
         return
@@ -85,6 +83,7 @@ def replace_layers():
     if request.method == 'POST':
         if 'segment_button' in request.form: 
             if request.form['replace_button'] == 'Replace Layers':
+                print("replaceLAYERS is occuring")
                 #TODO: add replace layer algorithm here. This will be called when the replace layer
                 # button is pressed. Layers and their associated secondary_inputs are stored in layer_dict
                 return
