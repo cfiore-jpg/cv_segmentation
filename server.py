@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
 from werkzeug.utils import secure_filename
-from layerReplacement.processing import test_pims
+from layerReplacement.processing import test_pims, test2
 
 # from cv_segmentation.layerReplacement.layer_replacement import *
 
@@ -9,7 +9,7 @@ from layerReplacement.processing import test_pims
 UPLOAD_FOLDER = os.getcwd()
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}  # additional extensions, .mp4, .mov, .tiff, .avi
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'mp4'}  # additional extensions, .mp4, .mov, .tiff, .avi
 primary_input = None
 have_segmented = False
 layer_list = []
@@ -24,7 +24,7 @@ def allowed_file(filename):
 
 # Uploads the primary input
 def upload_primary_input():
-    
+
     if request.method == 'POST':
         if 'file' in request.files:
             global primary_input
@@ -63,9 +63,10 @@ def do_segment():
     global counter
     if primary_input:
         if request.method == 'POST':
-            if 'segment_button' in request.form: 
-                if request.form['segment_button'] == 'Segment':
+            if 'segment_button' in request.form:
 
+                if request.form['segment_button'] == 'Segment':
+                    test_pims(primary_input)
                     #TODO: test_pims function here. This should return the list of labels needed for frontend.
                     global layer_list
                     layer_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
@@ -75,6 +76,8 @@ def do_segment():
                     have_segmented = True
                     print("segment layer dict", layer_dict)
                     return layer_list
+            #else:
+                #test2()
     else:
         #no primary input, display message about uploading primary input?
         return

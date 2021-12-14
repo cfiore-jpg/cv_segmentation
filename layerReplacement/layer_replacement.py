@@ -20,9 +20,9 @@ def get_processed_matrix(layer_matrix, image_matrix):
     """
 
     processed = image_matrix
-    processed[:][:][0] = np.matmul(layer_matrix, image_matrix[:][:][0])
-    processed[:][:][1] = np.matmul(layer_matrix, image_matrix[:][:][1])
-    processed[:][:][2] = np.matmul(layer_matrix, image_matrix[:][:][2])
+    processed[:, :, 0] = np.matmul(layer_matrix, image_matrix[:, :, 0])
+    processed[:, :, 1] = np.matmul(layer_matrix, image_matrix[:, :, 1])
+    processed[:, :, 2] = np.matmul(layer_matrix, image_matrix[:, :, 2])
     return processed
 
 

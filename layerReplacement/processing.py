@@ -1,5 +1,10 @@
 import numpy as np
 import pims
+from skimage.transform import resize
+
+# import layer_replacement
+
+primary_input = None
 
 
 def make_layer_matrices(semantic_output):
@@ -53,36 +58,72 @@ def open_file(file_path):
     """
 
     images = pims.open(file_path)
-    # TODO: Verify that its readable and send ERROR if its not
 
-    outputArray = np.empty((images.shape[:2]))
+    global primary_input
+    primary_input = file_path
+
+    output_array = np.empty((len(images), images.frame_shape[0], images.frame_shape[1]))
 
     for frame in images:
-        x = 1
+        frame = frame_process(frame)
+        frame = segment_resize(frame)
         # perform semantic segmentation, give outputed layer to outputArray
 
-    return outputArray
+    return output_array
 
 
 def test_pims(filepath):
     # do things here to test out
-    print("commencing testing")
+    print("commencing test_pims")
 
+    global primary_input
+    primary_input = filepath
     images = pims.open(filepath)
 
-    print(images[0].shape)
+    images = frame_process(images)
+
+    made_image = resize(images[0], (128, 128, 3))
+
+    print("feature1")
+    print(images)
+    print("feature2")
+    print(resize(images[0], (128, 128, 3)))
+    print("feature3")
+    print(made_image.shape)
+
+    print("end testPIMS")
 
 
-# TODO: incorporate a pims-pipeline method
+def test2():
+    print(primary_input)
+
 
 def pre_layer_replace():
     """
    Description:
 
    Inputs:
+   #TODO: figure out form of inputs for secondary-inputs
 
    Outputs:
 
    """
 
     # TODO: fill this out. layer_replacement.py gets used here finally
+
+
+@pims.pipeline
+def frame_process(frame):
+    # Eliminates 4th dimensions if a png or gif
+
+    new_frame = frame[:, :, :3]
+    if frame.shape[2] == 4:
+        return frame[:, :, :3]
+    else:
+        return frame
+
+
+@pims.pipeline
+def segment_resize(frame):
+    frame = frame_process(frame)
+    return resize(frame, (128, 128, 3))
