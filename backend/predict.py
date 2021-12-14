@@ -45,14 +45,10 @@ if __name__ == '__main__':
 
     # model = SegNet(cfg.input_shape, cfg.num_classes)
     model = SegNet_VGG16(cfg.input_shape, cfg.num_classes)
-    model.load_weights("./segnet_weights.h5")
+    model.load_weights("segnet_weights.h5")
 
-    image = cv.imread("/Users/cameronfiore/Downloads/VOCdevkit/VOC2012/JPEGImages/2007_000250.jpg")
-    mask = Image.open("/Users/cameronfiore/Downloads/VOCdevkit/VOC2012/SegmentationClass/2007_000250.png")
-    palette = mask.palette
+    image = cv.imread("/Users/marti/Desktop/ORange HAt.jpg")
 
     result = inference(model, image)
 
     result = Image.fromarray(result, mode='P')
-    result.palette = palette
-    result.show()

@@ -1,10 +1,66 @@
 import numpy as np
 import pims
 from skimage.transform import resize
+from backend.predict import inference, SegNet_VGG16
+import backend.core.config as cfg
+import cv2 as cv
 
 # import layer_replacement
 
 primary_input = None
+
+
+def open_file(file_path):
+    """
+    Description:
+    first method called after pressing 'segment' in front-end. SEGMENTATION OCCURS HERE
+
+    Inputs:
+        file_path: string detailing path of file.
+        Extension already approved
+
+    Outputs:
+    an f x m x n np array containing segmentation output.
+    """
+
+    images = pims.open(file_path)
+
+    global primary_input
+    primary_input = file_path
+
+    output_array = np.empty((len(images), images.frame_shape[0], images.frame_shape[1]))
+
+    for frame in images:
+        frame = frame_process(frame)
+        print(frame.shape)
+
+    return output_array
+
+
+def isolate_segment(frame):
+    print("something")
+    # model = SegNet(cfg.input_shape, cfg.num_classes)
+    model = SegNet_VGG16(cfg.input_shape, cfg.num_classes)
+    model.load_weights("segnet_weights.h5")
+
+    result = inference(model, frame)
+
+
+@pims.pipeline
+def frame_process(frame):
+    # Eliminates 4th dimensions if a png or gif
+
+    new_frame = frame[:, :, :3]
+    if frame.shape[2] == 4:
+        return frame[:, :, :3]
+    else:
+        return frame
+
+
+@pims.pipeline
+def segment_resize(frame):
+    frame = frame_process(frame)
+    return resize(frame, (128, 128, 3))
 
 
 def make_layer_matrices(semantic_output):
@@ -44,60 +100,6 @@ def make_layer_matrices(semantic_output):
     # TODO: add layer matrix to larger return value then return after loop
 
 
-def open_file(file_path):
-    """
-    Description:
-    first method called after pressing 'segment' in front-end. SEGMENTATION OCCURS HERE
-
-    Inputs:
-        file_path: string detailing path of file.
-        Extension already approved
-
-    Outputs:
-    an f x m x n np array containing segmentation output.
-    """
-
-    images = pims.open(file_path)
-
-    global primary_input
-    primary_input = file_path
-
-    output_array = np.empty((len(images), images.frame_shape[0], images.frame_shape[1]))
-
-    for frame in images:
-        frame = frame_process(frame)
-        frame = segment_resize(frame)
-        # perform semantic segmentation, give outputed layer to outputArray
-
-    return output_array
-
-
-def test_pims(filepath):
-    # do things here to test out
-    print("commencing test_pims")
-
-    global primary_input
-    primary_input = filepath
-    images = pims.open(filepath)
-
-    images = frame_process(images)
-
-    made_image = resize(images[0], (128, 128, 3))
-
-    print("feature1")
-    print(images)
-    print("feature2")
-    print(resize(images[0], (128, 128, 3)))
-    print("feature3")
-    print(made_image.shape)
-
-    print("end testPIMS")
-
-
-def test2():
-    print(primary_input)
-
-
 def pre_layer_replace():
     """
    Description:
@@ -110,20 +112,3 @@ def pre_layer_replace():
    """
 
     # TODO: fill this out. layer_replacement.py gets used here finally
-
-
-@pims.pipeline
-def frame_process(frame):
-    # Eliminates 4th dimensions if a png or gif
-
-    new_frame = frame[:, :, :3]
-    if frame.shape[2] == 4:
-        return frame[:, :, :3]
-    else:
-        return frame
-
-
-@pims.pipeline
-def segment_resize(frame):
-    frame = frame_process(frame)
-    return resize(frame, (128, 128, 3))

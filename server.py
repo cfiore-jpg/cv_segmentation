@@ -1,8 +1,7 @@
 import os
-from flask import Flask, render_template, flash, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, flash, request, redirect
 from werkzeug.utils import secure_filename
-from layerReplacement.processing import test_pims, test2
-
+from processing import test_pims
 
 UPLOAD_FOLDER = os.getcwd()
 app = Flask(__name__)
