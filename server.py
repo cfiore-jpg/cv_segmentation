@@ -3,8 +3,6 @@ from flask import Flask, render_template, flash, request, redirect, url_for, sen
 from werkzeug.utils import secure_filename
 from layerReplacement.processing import test_pims, test2
 
-# from cv_segmentation.layerReplacement.layer_replacement import *
-
 
 UPLOAD_FOLDER = os.getcwd()
 app = Flask(__name__)
@@ -73,7 +71,6 @@ def do_segment():
                     global layer_list
                     layer_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
                     global layer_dict
-                    #layer_dict = dict.fromkeys(layer_list, [])
                     layer_dict = {k: [] for k in layer_list}
                     global have_segmented
                     have_segmented = True
@@ -106,7 +103,4 @@ def index():
 
 
 #TODO: Clear data folders at the beginning of each run?
-#TODO: Figure out importing functions from different files. May involve init.py
-# dictionary of layers to uploads
-#TODO: pass list of video, image, or nothing, for each layer. Default is nothing.
 #TODO: flashes interrupt flow of gui, change these to messages?
