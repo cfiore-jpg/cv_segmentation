@@ -2,3 +2,4 @@ data/
 backend/UNet/
 *.npy
 backend/checkpoint/
+backend/segnet_weights.h5
