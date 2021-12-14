@@ -24,6 +24,13 @@
                     <form method=post enctype=multipart/form-data>
                         <input type="hidden" id="index" name="index" value="{{ currlist }}">
                         <input type=file name=secondary_input>
+                        <p>Please identify your input for this layer:</p>
+                        <input type="radio" id="nothing" name="input_type" value="nothing" checked>
+                        <label for="nothing">Nothing</label><br>
+                        <input type="radio" id="image" name="input_type" value="image">
+                        <label for="image">Image</label><br>
+                        <input type="radio" id="video" name="input_type" value="video">
+                        <label for="video">Video</label>
                         <input type=submit value=Upload>
                     </form>
                 {%endfor%}

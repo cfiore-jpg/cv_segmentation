@@ -34,7 +34,7 @@ def upload_primary_input():
                 return redirect(request.url)
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "frontend/static/data/primary_inputs", filename)
+                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/primary_inputs", filename)
                 file.save(new_path)
                 primary_input = new_path
                 return new_path
@@ -51,9 +51,11 @@ def upload_secondary_input():
                 return redirect(request.url)
             if secondary_input and allowed_file(secondary_input.filename):
                 filename = secure_filename(secondary_input.filename)
-                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "frontend/static/data/secondary_inputs", filename)
+                new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
                 secondary_input.save(new_path)
-                layer_dict[curr_layer] = new_path
+                print("curr layer", curr_layer)
+                layer_dict[curr_layer].append(request.form["input_type"])
+                layer_dict[curr_layer].append(new_path)
                 print("secondary layer dict", layer_dict)
                 return new_path
     return
@@ -70,7 +72,8 @@ def do_segment():
                     global layer_list
                     layer_list = ["car", "dog", "tree", "house", "sidewalk", "bike", "crosswalk", "pedestrian", "garage", "bush", "lawn"]
                     global layer_dict
-                    layer_dict = dict.fromkeys(layer_list, "")
+                    #layer_dict = dict.fromkeys(layer_list, [])
+                    layer_dict = {k: [] for k in layer_list}
                     global have_segmented
                     have_segmented = True
                     print("segment layer dict", layer_dict)
@@ -103,3 +106,4 @@ def index():
 #TODO: Figure out importing functions from different files. May involve init.py
 # dictionary of layers to uploads
 #TODO: pass list of video, image, or nothing, for each layer. Default is nothing.
+#TODO: flashes interrupt flow of gui, change these to messages?
