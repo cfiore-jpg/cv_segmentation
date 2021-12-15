@@ -1,6 +1,7 @@
 import numpy as np
 from skimage.transform import resize
 import pims
+from matplotlib import pyplot as plt
 
 
 def get_processed_matrix(layer_matrix, image_matrix):
@@ -18,11 +19,18 @@ def get_processed_matrix(layer_matrix, image_matrix):
         layer_matrix had 1s in the same spot.
 
     """
+    plt.imshow(layer_matrix)
+    plt.show()
+    plt.imshow(image_matrix[:, :, 0])
+    plt.show()
 
     processed = image_matrix
-    processed[:, :, 0] = np.matmul(layer_matrix, image_matrix[:, :, 0])
-    processed[:, :, 1] = np.matmul(layer_matrix, image_matrix[:, :, 1])
-    processed[:, :, 2] = np.matmul(layer_matrix, image_matrix[:, :, 2])
+    processed[:, :, 0] = np.multiply(layer_matrix, image_matrix[:, :, 0])
+    processed[:, :, 1] = np.multiply(layer_matrix, image_matrix[:, :, 1])
+    processed[:, :, 2] = np.multiply(layer_matrix, image_matrix[:, :, 2])
+    plt.imshow(processed)
+    plt.show()
+
     return processed
 
 
@@ -50,12 +58,12 @@ def naive_layer_frames(layer_matrices, filepath):
 
     images = pims.open(filepath)
 
-    frame_count = images.shape[0]  # TODO: check if legal
+    frame_count = len(images)  # TODO: check if legal
 
     output_frames = np.empty(
         (layer_matrices.shape[0], layer_matrices.shape[1], layer_matrices.shape[2], 3))
 
-    for i in range(layer_matrices):  # for each frame
+    for i in range(len(layer_matrices)):  # for each frame
         if frame_count == 1:  # if there is only 1 frame == just an image, so keep using only that
             image_frame = images[0]  # TODO: optimize this?
         elif i < frame_count:  # else, its a video, so check that secondary input has not fallen short
@@ -65,6 +73,7 @@ def naive_layer_frames(layer_matrices, filepath):
 
         # TODO: resize image_frame occurs here
         frame_layer_matrix = layer_matrices[i]
+        image_frame = resize(image_frame, (frame_layer_matrix.shape[0], frame_layer_matrix.shape[1]))
         processed_matrix = get_processed_matrix(frame_layer_matrix, image_frame)
         output_frames[i] = processed_matrix
 
@@ -86,8 +95,6 @@ def layer_replace(layer_matrices, secondary_filepaths):
 
     """
 
-    print(layer_matrices)
-    print(secondary_filepaths)
     # produce a 5 dimensional l x f x m x n x 3 np array that will contain the final video data
     final_video = np.empty((layer_matrices.shape[0], layer_matrices.shape[1], layer_matrices.shape[2],
                             layer_matrices.shape[3], 3))

@@ -5,12 +5,13 @@ from backend.predict import inference
 from backend.nets.SegNet import *
 import backend.core.config as cfg
 from layerReplacement.read_labels import read_labels
-
 from layerReplacement.layer_replacement import layer_replace
+from matplotlib import pyplot as plt
+import cv2 as cv
 
 primary_input = None
-layer_matrices = None
-unique_layers = None
+layer_matrices_global = None
+unique_layers_global = None
 number_to_label = read_labels("./layerReplacement/labels.json")
 
 
@@ -35,13 +36,13 @@ def open_file(file_path):
     # obtaining f x m x n output array
     output_array = get_segmented_layers(images)
 
-    global layer_matrices
-    global unique_layers
+    global layer_matrices_global
+    global unique_layers_global
     # passing output_array to make_layer_matrices, which takes in f x m x n
     # and outputs l x f x m x n in 1s and 0s
-    layer_matrices, unique_layers = make_layer_matrices(output_array)
+    layer_matrices_global, unique_layers_global = make_layer_matrices(output_array)
 
-    return unique_layers
+    return unique_layers_global
 
 
 def isolate_segment(frame):
@@ -135,8 +136,7 @@ def make_layer_matrices(semantic_output):
             layer_matrix = np.where((frame == layer_number),
                                     ones_array,
                                     zeros_array)
-
-            layer_matrices[layer_index][frame_index] = layer_matrix
+            layer_matrices[layer_index][frame_index] = layer_matrix[0]
 
     return layer_matrices, unique_layers
     # TODO: add layer matrix to larger return value then return after loop
@@ -155,26 +155,27 @@ def pre_layer_replace(layer_dict):
    """
     secondary_filepaths = []
     print("layer_matrices")
-    print(layer_matrices)
-    print("unique_layers")
-    print(unique_layers)
+    # print(layer_matrices)
+    if layer_matrices_global is not None:
+        print(layer_matrices_global.shape)
 
-    if unique_layers is not None:
-        for layer_number in unique_layers:
+    if unique_layers_global is not None:
+        for layer_number in unique_layers_global:
             secondary_input_list = layer_dict[number_to_label[layer_number]]
-            print(secondary_input_list)
 
-            if secondary_input_list[0] is "Nothing":
+            if secondary_input_list[0] == "Nothing":
                 secondary_filepaths.append(primary_input)
-            elif secondary_input_list[0] is "Video":
+            elif secondary_input_list[0] == "video":
+
                 secondary_filepaths.append(secondary_input_list[1])
-            elif secondary_input_list[0] is "Image":
+            elif secondary_input_list[0] == "image":
                 secondary_filepaths.append(secondary_input_list[1])
 
-    print("PRE LAYER REPALCING")
-    layer_replace(layer_matrices, secondary_filepaths)
+    final_video = layer_replace(layer_matrices_global, secondary_filepaths)
 
-    # TODO: fill this out. layer_replacement.py gets used here finally
+    plt.imsave("saved_image.jpeg", final_video[0])
+    plt.imshow(final_video[0])
+    plt.show()
 
 
 if __name__ == '__main__':
