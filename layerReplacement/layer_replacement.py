@@ -85,6 +85,9 @@ def layer_replace(layer_matrices, secondary_filepaths):
     An f x m x n x 3 image sequence that represents the final video
 
     """
+
+    print(layer_matrices)
+    print(secondary_filepaths)
     # produce a 5 dimensional l x f x m x n x 3 np array that will contain the final video data
     final_video = np.empty((layer_matrices.shape[0], layer_matrices.shape[1], layer_matrices.shape[2],
                             layer_matrices.shape[3], 3))

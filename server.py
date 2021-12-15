@@ -52,7 +52,8 @@ def upload_secondary_input():
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
                 secondary_input.save(new_path)
                 print("curr layer", curr_layer)
-                layer_dict[curr_layer].append(request.form["input_type"])
+                layer_dict[curr_layer] = ["Nothing"]
+                layer_dict[curr_layer][0] = request.form["input_type"]
                 layer_dict[curr_layer].append(new_path)
                 print("secondary layer dict", layer_dict)
                 return new_path
@@ -73,7 +74,7 @@ def do_segment():
                         layer_list.append(number_to_label[layer_number])
 
                     global layer_dict
-                    layer_dict = {k: [] for k in layer_list}
+                    layer_dict = {k: ["Nothing"] for k in layer_list}
                     global have_segmented
                     have_segmented = True
                     print("segment layer dict", layer_dict)
@@ -87,6 +88,7 @@ def replace_layers():
     if request.method == 'POST':
         if 'replace_button' in request.form:
             if request.form['replace_button'] == 'Replace Layers':
+                print("hello hello hello")
                 pre_layer_replace(layer_dict) # giving it layer dict
                 # TODO: add replace layer algorithm here. This will be called when the replace layer
                 # button is pressed. Layers and their associated secondary_inputs are stored in layer_dict

@@ -154,10 +154,15 @@ def pre_layer_replace(layer_dict):
 
    """
     secondary_filepaths = []
+    print("layer_matrices")
+    print(layer_matrices)
+    print("unique_layers")
+    print(unique_layers)
 
     if unique_layers is not None:
         for layer_number in unique_layers:
             secondary_input_list = layer_dict[number_to_label[layer_number]]
+            print(secondary_input_list)
 
             if secondary_input_list[0] is "Nothing":
                 secondary_filepaths.append(primary_input)
