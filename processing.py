@@ -6,10 +6,11 @@ from backend.nets.SegNet import *
 import backend.core.config as cfg
 from layerReplacement.read_labels import read_labels
 
-# import layer_replacement
+from layerReplacement.layer_replacement import layer_replace
 
 primary_input = None
 layer_matrices = None
+unique_layers = None
 number_to_label = read_labels("./layerReplacement/labels.json")
 
 
@@ -35,11 +36,10 @@ def open_file(file_path):
     output_array = get_segmented_layers(images)
 
     global layer_matrices
+    global unique_layers
     # passing output_array to make_layer_matrices, which takes in f x m x n
     # and outputs l x f x m x n in 1s and 0s
     layer_matrices, unique_layers = make_layer_matrices(output_array)
-
-    print(unique_layers)
 
     return unique_layers
 
@@ -142,23 +142,34 @@ def make_layer_matrices(semantic_output):
     # TODO: add layer matrix to larger return value then return after loop
 
 
-def pre_layer_replace():
+def pre_layer_replace(layer_dict):
     """
    Description:
 
    Inputs:
    #TODO: figure out form of inputs for secondary-inputs
-
+   layer_dict: A dictionary of size l
 
    Outputs:
 
    """
+    secondary_filepaths = []
+
+    if unique_layers is not None:
+        for layer_number in unique_layers:
+            secondary_input_list = layer_dict[number_to_label[layer_number]]
+
+            if secondary_input_list[0] is "Nothing":
+                secondary_filepaths.append(primary_input)
+            elif secondary_input_list[0] is "Video":
+                secondary_filepaths.append(secondary_input_list[1])
+            elif secondary_input_list[0] is "Image":
+                secondary_filepaths.append(secondary_input_list[1])
+
+    print("PRE LAYER REPALCING")
+    layer_replace(layer_matrices, secondary_filepaths)
 
     # TODO: fill this out. layer_replacement.py gets used here finally
-
-
-def test():
-    x = 1
 
 
 if __name__ == '__main__':

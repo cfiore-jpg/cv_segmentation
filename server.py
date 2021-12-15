@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, flash, request, redirect
 from werkzeug.utils import secure_filename
-from processing import open_file
+from processing import open_file, pre_layer_replace
 from layerReplacement.read_labels import read_labels
 
 UPLOAD_FOLDER = os.getcwd()
@@ -87,9 +87,10 @@ def do_segment():
 
 def replace_layers():
     if request.method == 'POST':
-        if 'segment_button' in request.form:
+        if 'replace_button' in request.form:
             if request.form['replace_button'] == 'Replace Layers':
                 print("replaceLAYERS is occuring")
+                pre_layer_replace(layer_dict) # giving it layer dict
                 # TODO: add replace layer algorithm here. This will be called when the replace layer
                 # button is pressed. Layers and their associated secondary_inputs are stored in layer_dict
                 return
