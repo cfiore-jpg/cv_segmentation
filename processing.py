@@ -131,17 +131,21 @@ def make_layer_matrices(semantic_output):
     layer_matrices = np.empty((amount_layers, semantic_output.shape[0], semantic_output.shape[1],
                                semantic_output.shape[2]))
 
-    for layer_index, layer_number in enumerate(unique_layers):
-        for frame_index, frame in enumerate(semantic_output):
+    for frame_index, frame in enumerate(semantic_output):
+        fig = plt.figure()
+        for layer_index, layer_number in enumerate(unique_layers):
+        #for frame_index, frame in enumerate(semantic_output):
             layer_matrix = np.where((frame == layer_number),
                                     ones_array,
                                     zeros_array)
             layer_matrices[layer_index][frame_index] = layer_matrix[0]
-            # plt.imshow(layer_matrix[0])
-            # plt.show()
-
+            # now set up matplot to show layers
+            ax = fig.add_subplot(1, len(unique_layers), layer_index + 1)
+            ax.set_title(number_to_label[layer_number])
+            plt.imshow(layer_matrix[0])
+    plt.show()
+    
     return layer_matrices, unique_layers
-    # TODO: add layer matrix to larger return value then return after loop
 
 
 def pre_layer_replace(layer_dict):
@@ -181,8 +185,7 @@ def pre_layer_replace(layer_dict):
         str1 = "static/data/output/frame"
         str2 = str(i)
         str3 = ".jpeg"
-        plt.imsave(str1+str2+str3, final_video[i])
-
+        plt.imsave(str1 + str2 + str3, final_video[i])
 
 
 if __name__ == '__main__':
