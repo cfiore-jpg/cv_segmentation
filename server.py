@@ -68,7 +68,7 @@ def do_segment():
                     unique_layers = open_file(primary_input)
                     number_to_label = read_labels("./layerReplacement/labels.json")
                     global layer_list
-                    layer_list = ["background", "person"]
+                    layer_list = []
                     for layer_number in unique_layers:
                         layer_list.append(number_to_label[layer_number])
 
