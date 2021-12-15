@@ -144,7 +144,7 @@ def make_layer_matrices(semantic_output):
             ax.set_title(number_to_label[layer_number])
             plt.imshow(layer_matrix[0])
     plt.show()
-    
+
     return layer_matrices, unique_layers
 
 

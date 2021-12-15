@@ -56,7 +56,7 @@ def naive_layer_frames(layer_matrices, filepath):
 
     images = pims.open(filepath)
 
-    frame_count = len(images)  # TODO: check if legal
+    frame_count = len(images) 
 
     output_frames = np.empty(
         (layer_matrices.shape[0], layer_matrices.shape[1], layer_matrices.shape[2], 3))
@@ -69,7 +69,6 @@ def naive_layer_frames(layer_matrices, filepath):
         else:  # if it has, then just freeze frame last frame of secondary input
             image_frame = images[-1]
 
-        # TODO: resize image_frame occurs here
         frame_layer_matrix = layer_matrices[i]
         image_frame = resize(image_frame, (frame_layer_matrix.shape[0], frame_layer_matrix.shape[1]))
         processed_matrix = get_processed_matrix(frame_layer_matrix, image_frame)
