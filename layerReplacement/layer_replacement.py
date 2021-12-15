@@ -19,17 +19,15 @@ def get_processed_matrix(layer_matrix, image_matrix):
         layer_matrix had 1s in the same spot.
 
     """
-    plt.imshow(layer_matrix)
-    plt.show()
-    plt.imshow(image_matrix[:, :, 0])
-    plt.show()
+    # plt.imshow(layer_matrix)
+    # plt.show()
 
     processed = image_matrix
     processed[:, :, 0] = np.multiply(layer_matrix, image_matrix[:, :, 0])
     processed[:, :, 1] = np.multiply(layer_matrix, image_matrix[:, :, 1])
     processed[:, :, 2] = np.multiply(layer_matrix, image_matrix[:, :, 2])
-    plt.imshow(processed)
-    plt.show()
+    # plt.imshow(processed)
+    # plt.show()
 
     return processed
 

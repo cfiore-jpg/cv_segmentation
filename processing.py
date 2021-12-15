@@ -137,6 +137,8 @@ def make_layer_matrices(semantic_output):
                                     ones_array,
                                     zeros_array)
             layer_matrices[layer_index][frame_index] = layer_matrix[0]
+            # plt.imshow(layer_matrix[0])
+            # plt.show()
 
     return layer_matrices, unique_layers
     # TODO: add layer matrix to larger return value then return after loop
@@ -173,9 +175,14 @@ def pre_layer_replace(layer_dict):
 
     final_video = layer_replace(layer_matrices_global, secondary_filepaths)
 
-    plt.imsave("saved_image.jpeg", final_video[0])
     plt.imshow(final_video[0])
     plt.show()
+    for i in range(len(final_video)):
+        str1 = "static/data/output/frame"
+        str2 = str(i)
+        str3 = ".jpeg"
+        plt.imsave(str1+str2+str3, final_video[i])
+
 
 
 if __name__ == '__main__':
