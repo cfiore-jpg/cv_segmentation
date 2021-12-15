@@ -103,4 +103,5 @@ def index():
 
 
 #TODO: Clear data folders at the beginning of each run?
+#https://www.techiedelight.com/delete-all-files-directory-python/
 #TODO: flashes interrupt flow of gui, change these to messages?
