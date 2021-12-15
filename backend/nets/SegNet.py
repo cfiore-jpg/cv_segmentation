@@ -5,11 +5,10 @@
 # @Software: PyCharm
 # @Brief: SegNet的实现
 
-import tensorflow as tf
 from tensorflow.keras import layers, models
 from tensorflow.python.keras.utils import data_utils
-from nets.MaxPoolingWithIndices2D import MaxPoolingWithIndices2D
-from nets.MaxUnpoolingWithIndices2D import MaxUnpoolingWithIndices2D
+from backend.nets.MaxPoolingWithIndices2D import MaxPoolingWithIndices2D
+from backend.nets.MaxUnpoolingWithIndices2D import MaxUnpoolingWithIndices2D
 import os
 
 
@@ -127,40 +126,13 @@ def SegNet(input_shape, num_classes):
     x = layers.Conv2D(num_classes, (1, 1), padding='valid', kernel_initializer='he_uniform')(x)
     outputs = layers.BatchNormalization()(x)
 
-#     outputs = layers.Activation('softmax')(x)
+    # outputs = layers.Activation('softmax')(x)
 
     segnet_model = models.Model(inputs=inputs, outputs=outputs, name='SegNet')
 
     return segnet_model
 
 
-def display_sample(display_list):
-    plt.figure(figsize=(9, 9))
-    title = ['Input Image', 'True Mask', 'Predicted Mask']
-    for i in range(len(display_list)):
-        plt.subplot(1, len(display_list), i+1)
-        plt.title(title[i])
-        plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[i]))
-        plt.axis('off')
-    plt.show()
-
-
-def create_mask(pred_mask: tf.Tensor) -> tf.Tensor:
-    """Return a filter mask with the top 1 predicitons
-    """
-    pred_mask = tf.argmax(pred_mask, axis=-1)
-    pred_mask = tf.expand_dims(pred_mask, axis=-1)
-    return pred_mask
-
-
-def show_predictions(dataset, model, num=1):
-    """Show a sample prediction."""
-    for image, mask in dataset.take(num):
-        pred_mask = model.predict(image)
-        pred_mask = tf.nn.softmax(pred_mask)
-        display_sample([image[0], mask[0], create_mask(pred_mask)[0]])
-
-        
 def SegNet_VGG16(input_shape, num_classes):
     """
     VGG16作为encoder实现的SegNet
@@ -250,4 +222,11 @@ def SegNet_VGG16(input_shape, num_classes):
     outputs = layers.Conv2D(num_classes, (1, 1), padding='valid', kernel_initializer='he_uniform')(x)
 
     model = models.Model(inputs, outputs)
+    # weights_path = os.path.expanduser(os.path.join('~', '.keras/models/vgg16_weights_tf_dim_ordering_tf_kernels.h5'))
+    # weights_path = data_utils.get_file(
+    #     weights_path,
+    #     'https://storage.googleapis.com/tensorflow/keras-applications/resnet/resnet50_weights_tf_dim_ordering_tf_kernels.h5')
+
+    # model.load_weights(weights_path, by_name=True, skip_mismatch=True)
+
     return model

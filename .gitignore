@@ -1,4 +1,6 @@
-data/
+static/data/primary_inputs/*
+static/data/secondary_inputs/*
 backend/UNet/
 *.npy
 backend/checkpoint/
+backend/segnet_weights.h5
