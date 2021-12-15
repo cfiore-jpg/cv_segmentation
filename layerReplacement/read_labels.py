@@ -7,6 +7,3 @@ def read_labels(dict_path):
     for key in l:
         labels[int(key)] = l[key]
     return labels
-
-labels = read_labels("labels.json")
-print(labels)

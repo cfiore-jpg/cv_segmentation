@@ -4,11 +4,13 @@ from skimage.transform import resize
 from backend.predict import inference
 from backend.nets.SegNet import *
 import backend.core.config as cfg
+from layerReplacement.read_labels import read_labels
 
 # import layer_replacement
 
 primary_input = None
 layer_matrices = None
+number_to_label = read_labels("./layerReplacement/labels.json")
 
 
 def open_file(file_path):
@@ -37,6 +39,8 @@ def open_file(file_path):
     # and outputs l x f x m x n in 1s and 0s
     layer_matrices, unique_layers = make_layer_matrices(output_array)
 
+    print(unique_layers)
+
     return unique_layers
 
 
@@ -50,9 +54,9 @@ def isolate_segment(frame):
     Outputs:
         an m x n array of the processed segmented image
     """
-    # model = SegNet(cfg.input_shape, cfg.num_classes)
+
     model = SegNet_VGG16(cfg.input_shape, cfg.num_classes)
-    model.load_weights("segnet_weights.h5")
+    model.load_weights("backend/segnet_weights.h5")
 
     result = inference(model, frame)
 
@@ -78,7 +82,6 @@ def get_segmented_layers(images):
 
     for i in range(len(images)):  # loop through every frame
         frame = frame_process(images[i])
-        print(frame.shape)
         layer_matrix = isolate_segment(frame)
         output_array[i] = layer_matrix
 
@@ -99,7 +102,7 @@ def frame_process(frame):
 @pims.pipeline
 def segment_resize(frame):
     frame = frame_process(frame)
-    return resize(frame, (128, 128, 3))
+    return resize(frame, (320, 320, 3))
 
 
 def make_layer_matrices(semantic_output):
@@ -146,6 +149,7 @@ def pre_layer_replace():
    Inputs:
    #TODO: figure out form of inputs for secondary-inputs
 
+
    Outputs:
 
    """
@@ -153,7 +157,9 @@ def pre_layer_replace():
     # TODO: fill this out. layer_replacement.py gets used here finally
 
 
-if __name__ == '__main__':
-    x = 1 +2
-    print(x)
+def test():
+    x = 1
 
+
+if __name__ == '__main__':
+    x = 1
