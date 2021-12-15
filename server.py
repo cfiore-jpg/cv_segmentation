@@ -46,8 +46,7 @@ def upload_secondary_input():
             secondary_input = request.files['secondary_input']
             curr_layer = request.form['index']
             if secondary_input.filename == '':
-                flash('No selected file')
-                return redirect(request.url)
+                return
             if secondary_input and allowed_file(secondary_input.filename):
                 filename = secure_filename(secondary_input.filename)
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
@@ -65,14 +64,13 @@ def do_segment():
     if primary_input:
         if request.method == 'POST':
             if 'segment_button' in request.form:
-
                 if request.form['segment_button'] == 'Segment':
-                    #unique_layers = open_file(primary_input)
-                    #number_to_label = read_labels("./layerReplacement/labels.json")
+                    unique_layers = open_file(primary_input)
+                    number_to_label = read_labels("./layerReplacement/labels.json")
                     global layer_list
                     layer_list = ["background", "person"]
-                    #for layer_number in unique_layers:
-                    #    layer_list.append(number_to_label[layer_number])
+                    for layer_number in unique_layers:
+                        layer_list.append(number_to_label[layer_number])
 
                     global layer_dict
                     layer_dict = {k: [] for k in layer_list}
@@ -89,7 +87,6 @@ def replace_layers():
     if request.method == 'POST':
         if 'replace_button' in request.form:
             if request.form['replace_button'] == 'Replace Layers':
-                print("replaceLAYERS is occuring")
                 pre_layer_replace(layer_dict) # giving it layer dict
                 # TODO: add replace layer algorithm here. This will be called when the replace layer
                 # button is pressed. Layers and their associated secondary_inputs are stored in layer_dict
@@ -104,6 +101,7 @@ def index():
     upload_secondary_input()
     print("primary", primary_input)
     do_segment()
+    replace_layers()
     return render_template('index.html', layer_list=layer_list, have_segmented=have_segmented)
 
 
