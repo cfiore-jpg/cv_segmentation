@@ -11,7 +11,6 @@ pip install tensorflow
 pip install opencv-python  
 ```
 2. Make sure that the pretrained model weights are located in the backend folder. The weights can be downloaded from: https://github.com/Runist/SegNet-keras/releases/download/v0.1/segnet_weights.h5.
-```
 
 3.  Running Frontend GUI. Make sure ```Flask``` is installed locally. In the cv_segmentation (root) folder, run the following three commands:  
   1.) export FLASK_APP=server  
