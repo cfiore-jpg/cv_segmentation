@@ -9,6 +9,7 @@
 pip install Flask  
 pip install tensorflow  
 pip install opencv-python  
+pip install pims
 ```
 2. Make sure that the pretrained model weights are located in the backend folder. The weights can be downloaded from: https://github.com/Runist/SegNet-keras/releases/download/v0.1/segnet_weights.h5.
 

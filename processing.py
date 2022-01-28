@@ -1,5 +1,5 @@
 import numpy as np
-import pims
+import pims as pim
 from skimage.transform import resize
 from backend.predict import inference
 from backend.nets.SegNet import *
@@ -20,7 +20,6 @@ def open_file(file_path):
     Description:
     first method called after pressing 'segment' in front-end. SEGMENTATION OCCURS HERE
 
-    Inputs:
         file_path: string detailing path of file.
         Extension already approved
 
@@ -28,7 +27,7 @@ def open_file(file_path):
     a 1 dimensional np array of size l with label numbers that correspond to each
     layer matrix
     """
-    images = pims.open(file_path)
+    images = pim.open(file_path)
 
     global primary_input
     primary_input = file_path
@@ -78,18 +77,19 @@ def get_segmented_layers(images):
         an f x m x n np array containing segmentation output.
     """
 
-    # TODO: change output_array size if desired -- future application
+    # TODO: change output_array size if desired -- future application --YEAHHHH
     output_array = np.empty((len(images), 320, 320))
 
     for i in range(len(images)):  # loop through every frame
         frame = frame_process(images[i])
+        #THIS IS WHERE SEGMENTING HAPPENS change here or add "options"
         layer_matrix = isolate_segment(frame)
         output_array[i] = layer_matrix
 
     return output_array
 
 
-@pims.pipeline
+@pim.pipeline
 def frame_process(frame):
     # Eliminates 4th dimensions if a png or gif
 
@@ -100,7 +100,7 @@ def frame_process(frame):
         return frame
 
 
-@pims.pipeline
+@pim.pipeline
 def segment_resize(frame):
     frame = frame_process(frame)
     return resize(frame, (320, 320, 3))
