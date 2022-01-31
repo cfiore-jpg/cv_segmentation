@@ -1,7 +1,7 @@
 import os
 from flask import Flask, render_template, flash, request, redirect
 from werkzeug.utils import secure_filename
-from processing import open_file, pre_layer_replace
+from processing import open_file, pre_layer_replace, show_layer
 from layerReplacement.read_labels import read_labels
 
 UPLOAD_FOLDER = os.getcwd()
@@ -45,22 +45,26 @@ def upload_secondary_input():
         if 'secondary_input' in request.files:
             secondary_input = request.files['secondary_input']
             curr_layer = float(request.form['index'])
-            print("THIS IS CURRENT LAYER")
-            print(curr_layer)
             if secondary_input.filename == '':
                 return
             if secondary_input and allowed_file(secondary_input.filename):
                 filename = secure_filename(secondary_input.filename)
                 new_path = os.path.join(app.config['UPLOAD_FOLDER'], "static/data/secondary_inputs", filename)
                 secondary_input.save(new_path)
-                print("curr layer", curr_layer)
+                print("curr layer IS:", curr_layer)
                 layer_dict[curr_layer] = ["Nothing"]
                 layer_dict[curr_layer][0] = request.form["input_type"]
                 layer_dict[curr_layer].append(new_path)
-                print("secondary layer dict", layer_dict)
                 return new_path
     return
 
+def check_secondary_segmentation():
+    if request.method == 'POST':
+        if 'check_segment' in request.form:
+            if request.form['check_segment'] == 'Check_Layer':
+                curr_layer = float(request.form['layer_index'])
+                show_layer(curr_layer)
+    return
 
 def do_segment():
     global counter
@@ -102,9 +106,10 @@ def replace_layers():
 def index():
     upload_primary_input()
     upload_secondary_input()
-    print("primary", primary_input)
+    #print("primary", primary_input)
     do_segment()
     replace_layers()
+    check_secondary_segmentation()
     return render_template('index.html', layer_list=layer_list, have_segmented=have_segmented)
 
 

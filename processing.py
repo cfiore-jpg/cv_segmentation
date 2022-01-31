@@ -150,6 +150,9 @@ def make_layer_matrices(semantic_output):
 
     return layer_matrices, unique_layers
 
+def show_layer(layer):
+    print(layer)
+
 
 def pre_layer_replace(layer_dict):
     """

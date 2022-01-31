@@ -21,6 +21,10 @@
                 {%for i in range(0, layer_list|length)%}
                     {% set currlist = layer_list[i] %}
                     <li>{{currlist}}</li>
+                    <form method=post enctype="multipart/form-data">
+                        <input type="hidden" id="layer_index" name="layer_index" value="{{ currlist }}">
+                        <input type="submit" name="check_segment" value="Check_Layer">
+                    </form>
                     <form method=post enctype=multipart/form-data>
                         <input type="hidden" id="index" name="index" value="{{ currlist }}">
                         <input type=file name=secondary_input>
