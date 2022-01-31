@@ -44,7 +44,9 @@ def upload_secondary_input():
     if request.method == 'POST':
         if 'secondary_input' in request.files:
             secondary_input = request.files['secondary_input']
-            curr_layer = request.form['index']
+            curr_layer = float(request.form['index'])
+            print("THIS IS CURRENT LAYER")
+            print(curr_layer)
             if secondary_input.filename == '':
                 return
             if secondary_input and allowed_file(secondary_input.filename):
@@ -67,11 +69,10 @@ def do_segment():
             if 'segment_button' in request.form:
                 if request.form['segment_button'] == 'Segment':
                     unique_layers = open_file(primary_input)
-                    number_to_label = read_labels("./layerReplacement/labels.json")
                     global layer_list
                     layer_list = []
                     for layer_number in unique_layers:
-                        layer_list.append(number_to_label[layer_number])
+                        layer_list.append(layer_number)
 
                     global layer_dict
                     layer_dict = {k: ["Nothing"] for k in layer_list}

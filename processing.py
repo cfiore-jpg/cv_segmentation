@@ -1,18 +1,19 @@
 import numpy as np
 import pims as pim
 from skimage.transform import resize
-from backend.predict import inference
-from backend.nets.SegNet import *
-import backend.core.config as cfg
 from layerReplacement.read_labels import read_labels
 from layerReplacement.layer_replacement import layer_replace
 from matplotlib import pyplot as plt
-import cv2 as cv
+from pickletools import uint8
+import mxnet as mx
+from mxnet import image
+from mxnet.gluon.data.vision import transforms
+import gluoncv
+from gluoncv.data.transforms.presets.segmentation import test_transform
 
 primary_input = None
 layer_matrices_global = None
 unique_layers_global = None
-number_to_label = read_labels("./layerReplacement/labels.json")
 
 
 def open_file(file_path):
@@ -44,7 +45,7 @@ def open_file(file_path):
     return unique_layers_global
 
 
-def isolate_segment(frame):
+def isolate_segment(frame, model):
     """
     Description:
 
@@ -55,14 +56,15 @@ def isolate_segment(frame):
         an m x n array of the processed segmented image
     """
 
-    model = SegNet_VGG16(cfg.input_shape, cfg.num_classes)
-    model.load_weights("backend/segnet_weights.h5")
+    ctx = ctx = mx.cpu(0)
 
-    result = inference(model, frame)
+    realFrame = mx.nd.array(frame, ctx=ctx)
+    img = test_transform(realFrame, ctx)
+    output = model.predict(img)
+    predict = mx.nd.squeeze(mx.nd.argmax(output, 1)).asnumpy()
 
-    # maybe reformat??
 
-    return result
+    return predict
 
 
 def get_segmented_layers(images):
@@ -70,22 +72,23 @@ def get_segmented_layers(images):
     Description:
 
     Inputs:
-        images: a pims file with f frame, and m x n x 3 "Frames" that extend np array
+        images: a pims file with f frames, and m x n x 3 "Frames" that extend np array
         will loop through f
 
     Outputs:
         an f x m x n np array containing segmentation output.
     """
 
+
     # TODO: change output_array size if desired -- future application --YEAHHHH
-    output_array = np.empty((len(images), 320, 320))
+    output_array = np.empty((len(images), images[0].shape[0], images[0].shape[1]))
+    model = gluoncv.model_zoo.get_model('psp_resnet101_ade', pretrained=True)
 
     for i in range(len(images)):  # loop through every frame
         frame = frame_process(images[i])
         #THIS IS WHERE SEGMENTING HAPPENS change here or add "options"
-        layer_matrix = isolate_segment(frame)
+        layer_matrix = isolate_segment(frame, model)
         output_array[i] = layer_matrix
-
     return output_array
 
 
@@ -141,7 +144,7 @@ def make_layer_matrices(semantic_output):
             layer_matrices[layer_index][frame_index] = layer_matrix[0]
             # now set up matplot to show layers
             ax = fig.add_subplot(1, len(unique_layers), layer_index + 1)
-            ax.set_title(number_to_label[layer_number])
+            ax.set_title(layer_number)
             plt.imshow(layer_matrix[0])
     plt.show()
 
@@ -160,14 +163,17 @@ def pre_layer_replace(layer_dict):
 
    """
     secondary_filepaths = []
-    print("layer_matrices")
     # print(layer_matrices)
     if layer_matrices_global is not None:
+        print("layer_matrices is not none")
         print(layer_matrices_global.shape)
+        print(unique_layers_global)
 
     if unique_layers_global is not None:
         for layer_number in unique_layers_global:
-            secondary_input_list = layer_dict[number_to_label[layer_number]]
+            print(layer_number)
+            secondary_input_list = layer_dict[layer_number] #TODO:figure out if this change is doing most of the error work
+            print(layer_dict[layer_number])
 
             if secondary_input_list[0] == "Nothing":
                 secondary_filepaths.append(primary_input)
